@@ -149,7 +149,7 @@ struct HomeView: View {
             .frame(width: 34, height: 34)
             .frame(width: 36, height: 36, alignment: .leading)
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("BioTrack")
+            .accessibilityLabel("AJUSTE")
     }
 
     private var header: some View {

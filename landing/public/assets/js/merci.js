@@ -48,8 +48,8 @@ function setupShare() {
 
   shareButton.addEventListener('click', async () => {
     const shareData = {
-      title: 'BioTrack',
-      text: 'Découvre BioTrack, app iOS biohacking orientée performance et confidentialité.',
+      title: 'AJUSTE',
+      text: 'Découvre AJUSTE, app iOS biohacking orientée performance et confidentialité.',
       url: window.location.origin
     };
 

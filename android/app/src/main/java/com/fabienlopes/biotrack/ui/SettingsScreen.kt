@@ -184,7 +184,7 @@ fun SettingsScreen(viewModel: BioTrackViewModel, onClose: () -> Unit) {
             }
 
             SettingsSection("Confidentialité et informations") {
-                Text("BioTrack est un outil d’auto-observation. Les statistiques sont exploratoires et ne constituent ni diagnostic ni conseil médical.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("AJUSTE est un outil d’auto-observation. Les statistiques sont exploratoires et ne constituent ni diagnostic ni conseil médical.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 TextButton(onClick = { legalDocument = LegalDocument.PRIVACY }) { Text("Politique de confidentialité") }
                 TextButton(onClick = { legalDocument = LegalDocument.SUPPORT }) { Text("Support") }
                 TextButton(onClick = { legalDocument = LegalDocument.TERMS }) { Text("Conditions d'utilisation") }
@@ -240,9 +240,9 @@ private fun SettingsToggleRow(icon: androidx.compose.ui.graphics.vector.ImageVec
 }
 
 private enum class LegalDocument(val title: String, val body: String) {
-    PRIVACY("Confidentialité", "BioTrack conserve les routines, métriques, check-ins, protocoles et exports dans le stockage privé de l'appareil. Health Connect est facultatif : seules les données autorisées sont lues pour préremplir localement des métriques. BioTrack ne vend pas ces données et n'utilise pas de compte distant."),
+    PRIVACY("Confidentialité", "AJUSTE conserve les routines, métriques, check-ins, protocoles et exports dans le stockage privé de l'appareil. Health Connect est facultatif : seules les données autorisées sont lues pour préremplir localement des métriques. AJUSTE ne vend pas ces données et n'utilise pas de compte distant."),
     SUPPORT("Support", "Pour signaler un problème, utilisez la page support publiée avec l'application et joignez la version Android ainsi que les étapes permettant de reproduire le problème. N'envoyez pas de données de santé dans une demande de support."),
-    TERMS("Conditions d'utilisation", "BioTrack est un outil d'auto-observation personnelle. Les résultats statistiques sont exploratoires et ne remplacent pas l'avis d'un professionnel de santé. Vous restez responsable des routines et données que vous saisissez.")
+    TERMS("Conditions d'utilisation", "AJUSTE est un outil d'auto-observation personnelle. Les résultats statistiques sont exploratoires et ne remplacent pas l'avis d'un professionnel de santé. Vous restez responsable des routines et données que vous saisissez.")
 }
 
 private fun healthStatusLabel(status: HealthConnectionStatus, manager: HealthConnectManager): String = when {

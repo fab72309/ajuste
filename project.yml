@@ -19,7 +19,7 @@ targets:
     info:
       path: BioTrack/Info.plist
       properties:
-        CFBundleDisplayName: BioTrack
+        CFBundleDisplayName: AJUSTE
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         UILaunchScreen:
@@ -31,8 +31,8 @@ targets:
         NSSupportsLiveActivities: true
         NSSupportsLiveActivitiesFrequentUpdates: true
         ITSAppUsesNonExemptEncryption: false
-        NSHealthShareUsageDescription: "BioTrack lit vos données Santé (sommeil, pas, poids, fréquence cardiaque au repos, HRV) pour pré-remplir vos métriques."
-        NSHealthUpdateUsageDescription: "BioTrack ne modifie aucune donnée Santé. Cette déclaration est requise par HealthKit ; l’app utilise Santé uniquement en lecture, avec votre accord, pour pré-remplir localement vos métriques."
+        NSHealthShareUsageDescription: "AJUSTE lit les données Santé que vous choisissez (sommeil, pas, poids, fréquence cardiaque au repos, HRV) afin de pré-remplir vos métriques localement."
+        NSHealthUpdateUsageDescription: "AJUSTE ne modifie aucune donnée Santé. Cette déclaration est requise par HealthKit ; l’app utilise Santé uniquement en lecture, avec votre accord."
         CFBundleURLTypes:
           - CFBundleURLName: com.fabienlopes.biotrack
             CFBundleURLSchemes:
@@ -66,7 +66,7 @@ targets:
     info:
       path: BioTrackWidgetExtension/Info.plist
       properties:
-        CFBundleDisplayName: BioTrack Widget
+        CFBundleDisplayName: AJUSTE Widget
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSExtension:

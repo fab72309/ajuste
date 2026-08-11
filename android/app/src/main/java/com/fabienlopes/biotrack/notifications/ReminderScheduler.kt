@@ -22,8 +22,8 @@ object ReminderScheduler {
     private const val extraReminderId = "reminder_id"
 
     fun createChannel(context: Context) {
-        val channel = NotificationChannel(channelId, "Rappels BioTrack", NotificationManager.IMPORTANCE_DEFAULT).apply {
-            description = "Rappels locaux de votre checklist BioTrack"
+        val channel = NotificationChannel(channelId, "Rappels AJUSTE", NotificationManager.IMPORTANCE_DEFAULT).apply {
+            description = "Rappels locaux de votre checklist AJUSTE"
         }
         context.getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
     }
@@ -95,12 +95,12 @@ object ReminderScheduler {
 class ReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         ReminderScheduler.createChannel(context)
-        val title = intent.getStringExtra("title") ?: "Rappel BioTrack"
+        val title = intent.getStringExtra("title") ?: "Rappel AJUSTE"
         val notificationId = intent.getStringExtra("reminder_id")?.hashCode()?.and(0x7FFFFFFF) ?: title.hashCode()
         val notification = NotificationCompat.Builder(context, ReminderScheduler.channelId)
             .setSmallIcon(R.drawable.ic_launcher)
             .setContentTitle(title)
-            .setContentText("Votre checklist BioTrack vous attend.")
+            .setContentText("Votre checklist AJUSTE vous attend.")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
             .build()

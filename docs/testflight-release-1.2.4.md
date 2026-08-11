@@ -1,8 +1,8 @@
-# BioTrack 1.2.4 (build 12) — notes de version TestFlight
+# AJUSTE 1.2.4 (build 12) — notes de version TestFlight
 
 ## Résumé
 
-BioTrack 1.2.4 clarifie la fenêtre Objectifs et harmonise l'apparence des
+AJUSTE 1.2.4 clarifie la fenêtre Objectifs et harmonise l'apparence des
 fenêtres de l'application. La progression, la période consultée et les
 actions restantes sont maintenant regroupées dans une hiérarchie plus facile
 à parcourir.
@@ -24,13 +24,13 @@ actions restantes sont maintenant regroupées dans une hiérarchie plus facile
 
 ## Positionnement
 
-BioTrack reste un outil d'auto-observation personnelle. Les statistiques et
+AJUSTE reste un outil d'auto-observation personnelle. Les statistiques et
 associations sont exploratoires et ne constituent ni un diagnostic, ni une
 preuve de causalité, ni un conseil médical.
 
 ## Version courte pour la description YouTube
 
-Dans cette mise à jour, BioTrack rend la fenêtre Objectifs plus claire,
+Dans cette mise à jour, AJUSTE rend la fenêtre Objectifs plus claire,
 harmonise les fenêtres de l’application et améliore la lecture des graphiques
 et des associations exploratoires. Les données restent privées et les
 statistiques servent à observer ses habitudes, sans diagnostic ni conseil

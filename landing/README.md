@@ -1,6 +1,6 @@
-# BioTrack Landing (FR)
+# AJUSTE Landing (FR)
 
-Landing page SEO/AEO + API de waitlist qualifiée pour BioTrack.
+Landing page SEO/AEO + API de waitlist qualifiée pour AJUSTE.
 
 ## Fonctionnalités
 

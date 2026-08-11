@@ -318,7 +318,7 @@ struct StatsView: View {
                     .accessibilityLabel("Recalculer les associations")
             }
             Label(
-                "Une association aide à formuler une hypothèse, mais ne prouve jamais qu’une métrique en cause une autre. BioTrack contrôle aussi la tendance générale et l’autocorrélation temporelle.",
+                "Une association aide à formuler une hypothèse, mais ne prouve jamais qu’une métrique en cause une autre. AJUSTE contrôle aussi la tendance générale et l’autocorrélation temporelle.",
                 systemImage: "info.circle"
             )
             .font(.caption)
@@ -332,7 +332,7 @@ struct StatsView: View {
                         .foregroundColor(.secondary)
                     Text("Aucun signal suffisamment étayé")
                         .font(.subheadline.weight(.semibold))
-                    Text("Enregistrez au moins 12 jours communs pour deux métriques. BioTrack écarte les tendances trompeuses, pénalise les journées trop similaires entre elles et corrige les comparaisons multiples.")
+                    Text("Enregistrez au moins 12 jours communs pour deux métriques. AJUSTE écarte les tendances trompeuses, pénalise les journées trop similaires entre elles et corrige les comparaisons multiples.")
                         .foregroundColor(.secondary)
                         .font(.caption)
                         .multilineTextAlignment(.center)

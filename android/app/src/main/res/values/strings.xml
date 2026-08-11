@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">BioTrack</string>
-    <string name="health_permissions_rationale">BioTrack lit uniquement les données Health Connect que vous choisissez pour préremplir vos métriques localement. Ces données ne sont ni vendues ni envoyées à un serveur BioTrack.</string>
+    <string name="app_name">AJUSTE</string>
+    <string name="health_permissions_rationale">AJUSTE lit uniquement les données Health Connect que vous choisissez pour préremplir vos métriques localement. Ces données ne sont ni vendues ni envoyées à un serveur AJUSTE.</string>
 </resources>

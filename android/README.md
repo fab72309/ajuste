@@ -1,6 +1,6 @@
-# BioTrack Android
+# AJUSTE Android
 
-La cible Android native reproduit le parcours BioTrack iOS avec Kotlin et Jetpack Compose : checklist, check-ins matin/soir, rappels locaux, métriques, graphiques, corrélations exploratoires, protocoles, suppléments, expériences N-of-1, export/import JSON et sauvegarde chiffrée.
+La cible Android native reproduit le parcours AJUSTE iOS avec Kotlin et Jetpack Compose : checklist, check-ins matin/soir, rappels locaux, métriques, graphiques, corrélations exploratoires, protocoles, suppléments, expériences N-of-1, export/import JSON et sauvegarde chiffrée.
 
 ## Ouvrir et compiler
 
@@ -19,7 +19,7 @@ L’application utilise `com.fabienlopes.biotrack`, `versionName 1.2.4` et `vers
 - Les données principales sont conservées dans le stockage privé de l’application, dans un snapshot JSON versionné.
 - Les notifications et rappels sont locaux.
 - Health Connect est facultatif et en lecture seule. Android peut fournir le sommeil, les pas, le poids, la fréquence cardiaque au repos et la variabilité RMSSD ; cette dernière n’est pas strictement identique à la HRV SDNN lue sur iOS.
-- Aucune permission Internet, aucun compte BioTrack et aucun backend ne sont nécessaires.
+- Aucune permission Internet, aucun compte AJUSTE et aucun backend ne sont nécessaires.
 - Le fichier d’export normal est un JSON lisible. Le fichier chiffré utilise AES-GCM avec une clé dérivée par PBKDF2-HMAC-SHA256.
 
 ## Publication

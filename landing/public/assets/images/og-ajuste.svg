@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">AJUSTE — Observe. Ajuste. Avance.</title>
+  <desc id="desc">Carte sociale de la marque AJUSTE.</desc>
+  <rect width="1200" height="630" fill="#F7F4EE"/>
+  <circle cx="1050" cy="80" r="260" fill="#FFE1DA"/>
+  <g transform="translate(90 88) scale(.72)">
+    <path d="M74 196h128c36 0 47-64 91-64h115" fill="none" stroke="#172B3A" stroke-width="38" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M74 316h128c36 0 47-64 91-64h76" fill="none" stroke="#FF6B57" stroke-width="38" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="423" cy="252" r="21" fill="#FF6B57"/>
+  </g>
+  <g font-family="Arial, sans-serif" fill="#172B3A">
+    <text x="410" y="235" font-size="94" font-weight="700" letter-spacing="18">AJUSTE</text>
+    <text x="410" y="330" font-size="46" font-weight="700">Observe. Ajuste. Avance.</text>
+    <text x="410" y="390" font-size="28" fill="#55636D">Un petit réglage. Un signal plus clair.</text>
+  </g>
+</svg>

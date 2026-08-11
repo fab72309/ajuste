@@ -4,7 +4,8 @@ import UserNotifications
 struct ContentView: View {
     @AppStorage("hasCompletedInitialOnboarding") private var hasCompletedInitialOnboarding: Bool = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var showLaunchOverlay = true
+    @State private var showLaunchOverlay =
+        !ProcessInfo.processInfo.arguments.contains("-appStoreScreenshots")
 
     var body: some View {
         ZStack {
@@ -165,7 +166,7 @@ struct OnboardingFlowView: View {
                 colors: [
                     Color("Background"),
                     Color("Background"),
-                    Color.blue.opacity(0.10)
+                    Color("Primary").opacity(0.10)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -759,9 +760,9 @@ enum LegalDocument: String, Identifiable {
 }
 
 enum BioTrackLinks {
-    static let privacyPolicy = URL(string: "https://fab72309.github.io/biotrack/privacy-policy.html")!
-    static let support = URL(string: "https://fab72309.github.io/biotrack/support.html")!
-    static let issueTracker = URL(string: "https://github.com/fab72309/biotrack/issues/new/choose")!
+    static let privacyPolicy = URL(string: "https://fab72309.github.io/ajuste/privacy-policy.html")!
+    static let support = URL(string: "https://fab72309.github.io/ajuste/support.html")!
+    static let issueTracker = URL(string: "https://github.com/fab72309/ajuste/issues/new/choose")!
     static let standardEULA = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
 }
 
@@ -815,9 +816,9 @@ private struct LaunchLoadingView: View {
                     Circle()
                         .fill(Color.white.opacity(0.82))
                         .frame(width: 198, height: 198)
-                        .shadow(color: Color.blue.opacity(glow ? 0.18 : 0.08), radius: glow ? 28 : 16, x: 0, y: 12)
+                        .shadow(color: Color("Secondary").opacity(glow ? 0.18 : 0.08), radius: glow ? 28 : 16, x: 0, y: 12)
                     Circle()
-                        .stroke(Color.blue.opacity(0.14), lineWidth: 1)
+                        .stroke(Color("Primary").opacity(0.14), lineWidth: 1)
                         .frame(width: 198, height: 198)
                     Image("OnboardingLogo")
                         .resizable()
@@ -837,7 +838,7 @@ private struct LaunchLoadingView: View {
 
                 ProgressView()
                     .progressViewStyle(.circular)
-                    .tint(Color.blue)
+                    .tint(Color("Secondary"))
             }
             .padding(.horizontal, 24)
         }
@@ -862,7 +863,7 @@ private struct LegalLinkButton: View {
                     .font(.caption.weight(.semibold))
             }
             .font(.footnote.weight(.semibold))
-            .foregroundColor(Color.blue)
+            .foregroundColor(Color("Primary"))
             .padding(.vertical, 4)
         }
         .buttonStyle(.plain)

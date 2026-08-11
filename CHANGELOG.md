@@ -170,3 +170,10 @@
 - Les séries utilisent des identifiants stables et les moyennes vides n’affichent plus `0`.
 - Suppression des courbes lissées susceptibles de suggérer des valeurs non mesurées.
 - Ajout de la couleur `Surface` manquante et correction de la couleur de l’écran de lancement.
+# AJUSTE — Unreleased
+
+- Nouvelle identité AJUSTE : symbole, palette, icônes iOS/Android et landing.
+- Le nom visible change sans modifier les identifiants d'installation, les
+  groupes d'app ni les formats de sauvegarde existants.
+- Nouveau positionnement : observer une routine, ajuster un détail et lire ses
+  tendances avec prudence, sans diagnostic ni promesse médicale.

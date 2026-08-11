@@ -16,8 +16,8 @@
 "status.not_available" = "Unavailable";
 "status.unknown" = "Unknown";
 
-"launch.loading.title" = "BioTrack";
-"launch.loading.subtitle" = "Preparing your tracking space.";
+"launch.loading.title" = "AJUSTE";
+"launch.loading.subtitle" = "Preparing your personal lab.";
 
 "onboarding.brand" = "BIOTRACK";
 "onboarding.step.counter" = "Step %d of %d";
@@ -26,16 +26,16 @@
 "onboarding.action.continue" = "Continue";
 
 "onboarding.welcome.title" = "Track what matters, simply.";
-"onboarding.welcome.subtitle" = "BioTrack brings together reminders, metrics, and routines in a private app that stays fast and easy to use.";
+"onboarding.welcome.subtitle" = "AJUSTE brings together reminders, metrics, and routines in a private app that stays fast and easy to use.";
 "onboarding.welcome.benefit.1" = "Checklist, reminders, and daily tracking in one place.";
 "onboarding.welcome.benefit.2" = "Optional Health app connection to prefill sleep, steps, weight, resting heart rate, and HRV.";
 "onboarding.welcome.benefit.3" = "Your data stays on your device unless you manually export it.";
-"onboarding.welcome.primary" = "Access BioTrack";
+"onboarding.welcome.primary" = "Access AJUSTE";
 "onboarding.welcome.legal_intro" = "Before you start, you can review the key legal and support information.";
 
 "onboarding.notifications.title" = "Notifications";
 "onboarding.notifications.subtitle" = "Enable reminders only if they are useful to you.";
-"onboarding.notifications.point.1" = "BioTrack uses local notifications only for your personal reminders.";
+"onboarding.notifications.point.1" = "AJUSTE uses local notifications only for your personal reminders.";
 "onboarding.notifications.point.2" = "No marketing or promotional notifications are sent.";
 "onboarding.notifications.point.3" = "You can change this choice at any time in iOS Settings.";
 "onboarding.notifications.footnote" = "Reminders are scheduled locally on your device after your explicit consent.";
@@ -44,27 +44,27 @@
 "onboarding.health.title" = "Health App";
 "onboarding.health.subtitle" = "Connect the Health app to prefill selected metrics automatically.";
 "onboarding.health.point.1" = "Possible read access: sleep, steps, weight, resting heart rate, and HRV.";
-"onboarding.health.point.2" = "These data are used only for local prefilling inside BioTrack.";
+"onboarding.health.point.2" = "These data are used only for local prefilling inside AJUSTE.";
 "onboarding.health.point.3" = "Access can be revoked at any time in iOS Settings > Health.";
-"onboarding.health.footnote" = "BioTrack works without an account, without a BioTrack backend, and without advertising use of your data.";
+"onboarding.health.footnote" = "AJUSTE works without an account, without a dedicated backend, and without advertising use of your data.";
 "onboarding.health.primary" = "Connect";
 
 "legal.privacy.title" = "Privacy";
-"legal.privacy.summary.1" = "BioTrack stores your tracking data locally on your device. No user account is required and BioTrack does not send your data to a dedicated server.";
+"legal.privacy.summary.1" = "AJUSTE stores your tracking data locally on your device. No user account is required and AJUSTE does not send your data to a dedicated server.";
 "legal.privacy.summary.2" = "If you enable Health access, only the categories you authorize are read to prefill selected metrics inside the app.";
-"legal.privacy.summary.3" = "BioTrack does not sell your data. Exports are manual, initiated by you, and saved to the location you choose.";
+"legal.privacy.summary.3" = "AJUSTE does not sell your data. Exports are manual, initiated by you, and saved to the location you choose.";
 "legal.privacy.open" = "Open the full privacy policy";
 
 "legal.support.title" = "Support";
-"legal.support.summary.1" = "For any question about the app, privacy, or a usage issue, you can contact BioTrack by email.";
-"legal.support.summary.2" = "Public support and issue reporting are available from the official BioTrack repository.";
+"legal.support.summary.1" = "For any question about the app, privacy, or a usage issue, you can contact AJUSTE by email.";
+"legal.support.summary.2" = "Public support and issue reporting are available from the official AJUSTE repository.";
 "legal.support.summary.3" = "Never include health data or a backup file in a public support ticket.";
 "legal.support.open" = "Open the support page";
 "legal.support.email" = "Open a support ticket";
 
 "legal.terms.title" = "Terms of Use";
-"legal.terms.summary.1" = "Use of BioTrack is subject to Apple's Standard End User License Agreement.";
-"legal.terms.summary.2" = "BioTrack is a personal wellness tracker. It is not a medical device and does not diagnose, treat, cure, or prevent any medical condition.";
+"legal.terms.summary.1" = "Use of AJUSTE is subject to Apple's Standard End User License Agreement.";
+"legal.terms.summary.2" = "AJUSTE is a personal wellness tracker. It is not a medical device and does not diagnose, treat, cure, or prevent any medical condition.";
 "legal.terms.summary.3" = "Statistical associations and recommendations are exploratory: they do not establish causation and do not replace professional medical advice.";
 "legal.terms.summary.4" = "Consult a healthcare professional before making medical decisions or taking supplements, especially if you use medication, are pregnant, have a condition, or experience symptoms.";
 "legal.terms.open" = "Open Apple's Standard EULA";

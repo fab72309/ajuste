@@ -1,4 +1,4 @@
-# BioTrack 1.2.1 — notes de version
+# AJUSTE 1.2.1 — notes de version
 
 ## Texte App Store Connect / TestFlight
 
@@ -14,6 +14,6 @@ Cette mise à jour rend les analyses plus rapides et plus fiables :
 
 ## Texte court pour la vidéo YouTube
 
-BioTrack 1.2.1 accélère les sauvegardes, renforce la fiabilité des associations
+AJUSTE 1.2.1 accélère les sauvegardes, renforce la fiabilité des associations
 et rend les fenêtres Objectifs et Hall des succès plus claires au quotidien.
 Vos données restent locales et l’analyse reste un outil d’auto-observation.

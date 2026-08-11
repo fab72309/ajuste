@@ -1,11 +1,11 @@
-# BioTrack Android — préparation Google Play
+# AJUSTE Android — préparation Google Play
 
 ## État de la cible
 
 - Application ID : `com.fabienlopes.biotrack`
 - Version : `1.2.4` / `versionCode 9`
 - Format de livraison : Android App Bundle (`.aab`)
-- Données : stockage privé local ; aucun compte BioTrack, backend ou permission Internet
+- Données : stockage privé local ; aucun compte AJUSTE, backend ou permission Internet
 - Santé : lecture facultative via Health Connect, avec permissions limitées aux types réellement utilisés
 - Positionnement : auto-observation personnelle ; les associations sont exploratoires et ne sont pas un diagnostic
 
@@ -13,13 +13,13 @@
 
 - [ ] Remplacer la clé de signature de démonstration par une clé Play App Signing gérée par le propriétaire du compte.
 - [ ] Générer puis conserver hors du dépôt le keystore et ses mots de passe.
-- [ ] Injecter `BIOTRACK_RELEASE_KEYSTORE`, `BIOTRACK_RELEASE_STORE_PASSWORD`, `BIOTRACK_RELEASE_KEY_ALIAS` et `BIOTRACK_RELEASE_KEY_PASSWORD` uniquement dans l’environnement de build ; le script n’active la signature release que si les quatre valeurs sont présentes.
+- [ ] Injecter `AJUSTE_RELEASE_KEYSTORE`, `AJUSTE_RELEASE_STORE_PASSWORD`, `AJUSTE_RELEASE_KEY_ALIAS` et `AJUSTE_RELEASE_KEY_PASSWORD` uniquement dans l’environnement de build ; le script n’active la signature release que si les quatre valeurs sont présentes.
 - [x] Vérifier `./gradlew test`, `./gradlew lint` et `./gradlew bundleRelease` avec le SDK 36 (6 tests sans échec, lint sans erreur bloquante, AAB générée ; signature encore absente).
 - [ ] Tester l’installation et la mise à jour sur au moins un appareil Android 13+ et un Android 14+.
 - [ ] Tester le refus des notifications, l’absence de Health Connect, le refus Health Connect, l’import JSON invalide et un mot de passe de sauvegarde incorrect.
 - [ ] Tester les rappels avec l’application fermée et vérifier le canal de notification.
 - [ ] Tester un export/import normal et chiffré sans divulguer de données personnelles.
-- [ ] Contrôler le formulaire Play Data safety avec les permissions effectivement déclarées et l’absence d’envoi vers un serveur BioTrack.
+- [ ] Contrôler le formulaire Play Data safety avec les permissions effectivement déclarées et l’absence d’envoi vers un serveur AJUSTE.
 - [ ] Déclarer précisément l’usage Health Connect dans Play Console et fournir l’URL de politique de confidentialité demandée par Google.
 - [ ] Préparer l’icône, les captures Android, le nom court, la description, le support et les mentions légales.
 - [ ] Faire une piste de test interne puis une piste fermée avant toute publication publique.

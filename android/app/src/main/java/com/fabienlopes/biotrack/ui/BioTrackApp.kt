@@ -225,7 +225,7 @@ private fun OnboardingScreen(viewModel: BioTrackViewModel) {
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("BIOTRACK", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = primary)
+                Text("AJUSTE", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = primary, letterSpacing = 2.sp)
                 Spacer(Modifier.weight(1f))
                 Text("${step + 1}/3", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
@@ -259,7 +259,7 @@ private fun OnboardingScreen(viewModel: BioTrackViewModel) {
                     Spacer(Modifier.height(12.dp))
                     Text(
                         when (current) {
-                            0 -> "BioTrack vous aide à observer vos routines, métriques, check-ins et protocoles sans compte ni serveur BioTrack."
+                            0 -> "AJUSTE vous aide à observer vos routines, métriques, check-ins et protocoles sans compte ni serveur AJUSTE."
                             1 -> "Les notifications sont locales. Vous pouvez les activer maintenant ou plus tard dans les paramètres."
                             else -> stringResource(com.fabienlopes.biotrack.R.string.health_permissions_rationale)
                         },
@@ -559,7 +559,7 @@ private fun ReminderDialog(onDismiss: () -> Unit, onSave: (Reminder) -> Unit) {
                 OutlinedTextField(notes, { notes = it }, label = { Text("Note (facultatif)") }, modifier = Modifier.fillMaxWidth())
             }
         },
-        confirmButton = { Button(onClick = { onSave(Reminder(title = title.ifBlank { "Rappel BioTrack" }, hour = hour.toIntOrNull()?.coerceIn(0, 23) ?: 8, minute = minute.toIntOrNull()?.coerceIn(0, 59) ?: 0, notes = notes.takeIf { it.isNotBlank() })) }, enabled = title.isNotBlank()) { Text("Ajouter") } },
+        confirmButton = { Button(onClick = { onSave(Reminder(title = title.ifBlank { "Rappel AJUSTE" }, hour = hour.toIntOrNull()?.coerceIn(0, 23) ?: 8, minute = minute.toIntOrNull()?.coerceIn(0, 59) ?: 0, notes = notes.takeIf { it.isNotBlank() })) }, enabled = title.isNotBlank()) { Text("Ajouter") } },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Annuler") } }
     )
 }

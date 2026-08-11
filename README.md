@@ -1,10 +1,12 @@
-# BioTrack — suivi personnel privé sur iOS
+# AJUSTE — votre laboratoire personnel, privé par défaut
 
-[![iOS CI](https://github.com/fab72309/biotrack/actions/workflows/ios-ci.yml/badge.svg)](https://github.com/fab72309/biotrack/actions/workflows/ios-ci.yml)
+[![iOS CI](https://github.com/fab72309/ajuste/actions/workflows/ios-ci.yml/badge.svg)](https://github.com/fab72309/ajuste/actions/workflows/ios-ci.yml)
 
-BioTrack est une application SwiftUI de suivi personnel centrée sur les routines, métriques, check-ins, protocoles et suppléments. Les données restent sur l’appareil, sans compte ni backend BioTrack.
+AJUSTE aide à observer ses routines, tester un changement à la fois et repérer
+des tendances personnelles. Les données restent sur l’appareil, sans compte ni
+backend AJUSTE.
 
-La version 1.2.4 renforce la fiabilité des associations temporelles, améliore les comparaisons entre unités différentes et rend les graphiques, légendes et fenêtres de l'application plus explicites. BioTrack comprend aussi des expériences N-of-1, HealthKit en lecture, des widgets, les Live Activities et des sauvegardes chiffrées.
+La version 1.2.4 renforce la fiabilité des associations temporelles, améliore les comparaisons entre unités différentes et rend les graphiques, légendes et fenêtres de l'application plus explicites. AJUSTE comprend aussi des expériences N-of-1, HealthKit en lecture, des widgets, les Live Activities et des sauvegardes chiffrées.
 
 ## Quickstart
 
@@ -18,7 +20,8 @@ La version 1.2.4 renforce la fiabilité des associations temporelles, améliore 
    xcodegen generate
    open BioTrack.xcodeproj
    ```
-4. Build & run the **BioTrack** scheme on an iPhone Simulator.
+4. Build & run the **BioTrack** scheme on an iPhone Simulator. Le schéma
+   conserve son nom technique historique pour préserver la compatibilité.
 
 ## Fonctionnalités
 
@@ -38,7 +41,7 @@ La version 1.2.4 renforce la fiabilité des associations temporelles, améliore 
 
 ## Android
 
-La cible Android native se trouve dans [`android/`](android/). Elle reprend le parcours local BioTrack avec Kotlin/Jetpack Compose et remplace HealthKit par Health Connect facultatif. Voir [`android/README.md`](android/README.md) et [`docs/google-play-android-release.md`](docs/google-play-android-release.md) pour la compilation, les limites connues et la préparation Play Store.
+La cible Android native se trouve dans [`android/`](android/). Elle reprend le parcours local AJUSTE avec Kotlin/Jetpack Compose et remplace HealthKit par Health Connect facultatif. Voir [`android/README.md`](android/README.md) et [`docs/google-play-android-release.md`](docs/google-play-android-release.md) pour la compilation, les limites connues et la préparation Play Store.
 
 ## Project structure
 

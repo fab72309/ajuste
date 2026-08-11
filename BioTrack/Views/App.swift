@@ -35,7 +35,9 @@ struct BioTrackApp: App {
     init() {
         let appearance = UITabBarAppearance()
         appearance.configureWithDefaultBackground()
-        let selectedColor = UIColor(named: "Primary") ?? .systemTeal
+        // Use the brand color directly during app initialization: named asset
+        // lookup can still be unavailable before the bundle finishes loading.
+        let selectedColor = UIColor(red: 23 / 255, green: 43 / 255, blue: 58 / 255, alpha: 1)
         let unselectedColor = UIColor.secondaryLabel
         // Stacked (iPhone portrait), Inline, CompactInline appearances
         appearance.stackedLayoutAppearance.selected.iconColor = selectedColor

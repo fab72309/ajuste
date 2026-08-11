@@ -142,7 +142,7 @@ struct TemplatesSheet: View {
                         }
                     }
                 }
-                Section(footer: Text("Ces modèles incluent la bibliothèque BioTrack et vos modèles personnalisés.")) { EmptyView() }
+                Section(footer: Text("Ces modèles incluent la bibliothèque AJUSTE et vos modèles personnalisés.")) { EmptyView() }
             }
             .navigationTitle("Modèles")
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Fermer") { dismiss() } } }
