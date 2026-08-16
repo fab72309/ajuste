@@ -761,7 +761,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = BioTrackWidgetExtension/BioTrackWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = X4Z4PH88ZT;
 				INFOPLIST_FILE = BioTrackWidgetExtension/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -864,7 +864,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = BioTrackWidgetExtension/BioTrackWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = X4Z4PH88ZT;
 				INFOPLIST_FILE = BioTrackWidgetExtension/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -962,7 +962,7 @@
 				CODE_SIGN_ENTITLEMENTS = BioTrack/BioTrack.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = X4Z4PH88ZT;
 				INFOPLIST_FILE = BioTrack/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
@@ -984,7 +984,7 @@
 				CODE_SIGN_ENTITLEMENTS = BioTrack/BioTrack.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = X4Z4PH88ZT;
 				INFOPLIST_FILE = BioTrack/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
