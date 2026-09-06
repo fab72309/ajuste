@@ -3,6 +3,10 @@ package com.fabienlopes.biotrack.data
 import android.content.Context
 import kotlinx.serialization.json.Json
 import java.io.File
+import java.io.FileOutputStream
+import java.nio.file.AtomicMoveNotSupportedException
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import java.security.SecureRandom
 import java.util.Base64
 import javax.crypto.Cipher
@@ -11,8 +15,8 @@ import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.SecretKeySpec
 
-class LocalStore(context: Context) {
-    private val file = File(context.filesDir, "biotrack-snapshot.json")
+class LocalStore private constructor(private val file: File) {
+    constructor(context: Context) : this(File(context.filesDir, "biotrack-snapshot.json"))
     private val json = Json {
         ignoreUnknownKeys = true
         encodeDefaults = true
@@ -20,30 +24,69 @@ class LocalStore(context: Context) {
     }
 
     fun load(): AppSnapshot {
-        if (!file.exists()) return AppSnapshot()
-        return runCatching { json.decodeFromString<AppSnapshot>(file.readText()) }
-            .getOrElse {
+        synchronized(fileLock) {
+            if (!file.exists()) return AppSnapshot()
+            val decoded = runCatching {
+                val raw = file.readText()
+                val sourceVersion = SnapshotMigration.sourceVersion(raw, json)
+                val migrated = SnapshotMigration.decode(raw, json)
+                sourceVersion to migrated
+            }.getOrElse {
                 preserveCorruptedFile()
-                AppSnapshot()
+                return AppSnapshot()
             }
-    }
-
-    fun save(snapshot: AppSnapshot) {
-        val temporary = File(file.parentFile, "${file.name}.tmp")
-        temporary.writeText(json.encodeToString(snapshot))
-        if (!temporary.renameTo(file)) {
-            file.writeText(json.encodeToString(snapshot))
-            temporary.delete()
+            if (decoded.first != SnapshotMigration.CURRENT_SCHEMA_VERSION) {
+                // A persistence failure must not discard a snapshot that decoded successfully.
+                runCatching { writeAtomically(json.encodeToString(decoded.second)) }
+            }
+            return decoded.second
         }
     }
 
-    fun encode(snapshot: AppSnapshot): String = json.encodeToString(snapshot)
+    fun save(snapshot: AppSnapshot) {
+        synchronized(fileLock) {
+            writeAtomically(json.encodeToString(SnapshotMigration.migrate(snapshot)))
+        }
+    }
 
-    fun decode(raw: String): AppSnapshot = json.decodeFromString(raw)
+    fun encode(snapshot: AppSnapshot): String = json.encodeToString(SnapshotMigration.migrate(snapshot))
+
+    fun decode(raw: String): AppSnapshot = SnapshotMigration.decode(raw, json)
+
+    private fun writeAtomically(serialized: String) {
+        val parent = requireNotNull(file.parentFile) { "Snapshot directory is unavailable." }
+        Files.createDirectories(parent.toPath())
+        val temporary = Files.createTempFile(parent.toPath(), "${file.name}.", ".tmp")
+        try {
+            FileOutputStream(temporary.toFile()).use { output ->
+                output.write(serialized.toByteArray(Charsets.UTF_8))
+                output.fd.sync()
+            }
+            try {
+                Files.move(
+                    temporary,
+                    file.toPath(),
+                    StandardCopyOption.ATOMIC_MOVE,
+                    StandardCopyOption.REPLACE_EXISTING
+                )
+            } catch (_: AtomicMoveNotSupportedException) {
+                Files.move(temporary, file.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            }
+        } finally {
+            Files.deleteIfExists(temporary)
+        }
+    }
 
     private fun preserveCorruptedFile() {
         val backup = File(file.parentFile, "${file.name}.corrupt-${System.currentTimeMillis()}")
         runCatching { file.copyTo(backup, overwrite = false) }
+    }
+
+    companion object {
+        internal fun forFile(file: File): LocalStore = LocalStore(file)
+
+        /** Coordinates all LocalStore instances in this process around read/migrate/write. */
+        private val fileLock = Any()
     }
 }
 

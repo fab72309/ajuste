@@ -1,6 +1,8 @@
 package com.fabienlopes.biotrack.integration
 
 import android.content.Context
+import android.content.Intent
+import android.os.Build
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
@@ -40,6 +42,20 @@ class HealthConnectManager(private val context: Context) {
         return client.permissionController.getGrantedPermissions().containsAll(permissions)
     }
 
+    suspend fun revokeAllPermissions(): Boolean {
+        val client = clientOrNull() ?: return false
+        client.permissionController.revokeAllPermissions()
+        return true
+    }
+
+    fun permissionsSettingsIntent(): Intent = if (Build.VERSION.SDK_INT >= 34) {
+        Intent("android.health.connect.action.MANAGE_HEALTH_PERMISSIONS")
+            .putExtra(Intent.EXTRA_PACKAGE_NAME, context.packageName)
+    } else {
+        Intent("androidx.health.ACTION_HEALTH_CONNECT_SETTINGS")
+            .setPackage("com.google.android.apps.healthdata")
+    }
+
     suspend fun readDailyValues(days: Int = 30): Map<String, Map<Long, Double>> {
         val client = clientOrNull() ?: return emptyMap()
         val end = Instant.now()
@@ -70,9 +86,9 @@ class HealthConnectManager(private val context: Context) {
             }
             runCatching {
                 val sleepMinutes = client.readRecords(ReadRecordsRequest(SleepSessionRecord::class, filter)).records.sumOf { session ->
-                    java.time.Duration.between(session.startTime, session.endTime).toMinutes().toDouble()
+                    overlapMinutes(session.startTime, session.endTime, dayStart, dayEnd)
                 }
-                if (sleepMinutes > 0) result.getOrPut("Sommeil") { mutableMapOf() }[dayStart.toEpochMilli()] = sleepMinutes
+                if (sleepMinutes > 0) result.getOrPut("Durée du sommeil") { mutableMapOf() }[dayStart.toEpochMilli()] = sleepMinutes
             }
         }
         return result
@@ -81,4 +97,11 @@ class HealthConnectManager(private val context: Context) {
     enum class Availability { AVAILABLE, PROVIDER_UPDATE_REQUIRED, NOT_SUPPORTED }
 
     private fun List<Double>.averageOrNull(): Double? = if (isEmpty()) null else average()
+}
+
+internal fun overlapMinutes(start: Instant, end: Instant, windowStart: Instant, windowEnd: Instant): Double {
+    val clippedStart = maxOf(start, windowStart)
+    val clippedEnd = minOf(end, windowEnd)
+    if (clippedEnd <= clippedStart) return 0.0
+    return java.time.Duration.between(clippedStart, clippedEnd).toMillis() / 60_000.0
 }

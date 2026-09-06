@@ -194,7 +194,7 @@ struct ObjectivesDetailContent: View {
             return true
         case .weekly(let days):
             let set = Set((!days.isEmpty ? days : (daysFallback ?? [])).map { $0 })
-            if set.isEmpty { return true }
+            if set.isEmpty { return false }
             return set.contains(currentWeekdayMon1ToSun7())
         }
     }
@@ -208,7 +208,7 @@ struct ObjectivesDetailContent: View {
                 return true
             case .weekly(let days):
                 let set = Set(days)
-                if set.isEmpty { return true }
+                if set.isEmpty { return false }
                 return set.contains(currentWeekdayMon1ToSun7())
             }
         }

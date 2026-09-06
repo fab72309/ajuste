@@ -19,7 +19,7 @@
 "launch.loading.title" = "AJUSTE";
 "launch.loading.subtitle" = "Préparation de votre laboratoire personnel.";
 
-"onboarding.brand" = "BIOTRACK";
+"onboarding.brand" = "AJUSTE";
 "onboarding.step.counter" = "Étape %d sur %d";
 "onboarding.action.later" = "Plus tard";
 "onboarding.action.open_settings" = "Ouvrir Réglages";

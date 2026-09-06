@@ -14,11 +14,15 @@ import java.time.ZoneId
 
 data class PlannedItem(
     val id: String,
+    val sourceId: String,
     val title: String,
     val kind: PlannedItemKind,
     val done: Boolean,
     val subtitle: String? = null,
-    val preferredMinutes: Int? = null
+    val preferredMinutes: Int? = null,
+    val occurrenceIndex: Int = 0,
+    val occurrenceCount: Int = 1,
+    val frequency: Frequency = Frequency.daily()
 )
 
 enum class PlannedItemKind { PROTOCOL, SUPPLEMENT }
@@ -47,27 +51,41 @@ object Planner {
         val profile = activeProfile(snapshot, now)
         val protocols = protocolsScheduledToday(snapshot, now)
             .filter { profile?.disabledProtocolIds?.contains(it.id) != true }
-            .map {
-                PlannedItem(
-                    id = it.id,
-                    title = it.name,
-                    kind = PlannedItemKind.PROTOCOL,
-                    done = isProtocolDoneToday(it.id, snapshot, now),
-                    subtitle = frequencyLabel(it.frequency),
-                    preferredMinutes = preferredMinutes(it.preferredHour, it.preferredMinute)
-                )
+            .flatMap { protocol ->
+                val count = protocol.frequency.effectiveTimesPerDay
+                (0 until count).map { index ->
+                    PlannedItem(
+                        id = occurrenceId(protocol.id, index),
+                        sourceId = protocol.id,
+                        title = protocol.name,
+                        kind = PlannedItemKind.PROTOCOL,
+                        done = isProtocolOccurrenceDone(protocol.id, index, snapshot, now),
+                        subtitle = null,
+                        preferredMinutes = occurrenceMinutes(preferredMinutes(protocol.preferredHour, protocol.preferredMinute), index, count),
+                        occurrenceIndex = index,
+                        occurrenceCount = count,
+                        frequency = protocol.frequency
+                    )
+                }
             }
         val supplements = supplementsScheduledToday(snapshot, now)
             .filter { profile?.disabledSupplementIds?.contains(it.id) != true }
-            .map {
-                PlannedItem(
-                    id = it.id,
-                    title = it.name,
-                    kind = PlannedItemKind.SUPPLEMENT,
-                    done = isSupplementTakenToday(it.id, snapshot, now),
-                    subtitle = it.dose ?: it.timeContext,
-                    preferredMinutes = it.timeOfDay
-                )
+            .flatMap { supplement ->
+                val count = supplement.frequency.effectiveTimesPerDay
+                (0 until count).map { index ->
+                    PlannedItem(
+                        id = occurrenceId(supplement.id, index),
+                        sourceId = supplement.id,
+                        title = supplement.name,
+                        kind = PlannedItemKind.SUPPLEMENT,
+                        done = isSupplementOccurrenceTaken(supplement.id, index, snapshot, now),
+                        subtitle = supplement.dose ?: supplement.timeContext,
+                        preferredMinutes = occurrenceMinutes(supplement.timeOfDay, index, count),
+                        occurrenceIndex = index,
+                        occurrenceCount = count,
+                        frequency = supplement.frequency
+                    )
+                }
             }
 
         val items = (protocols + supplements).sortedWith(
@@ -107,25 +125,55 @@ object Planner {
 
     fun upcomingRemindersToday(snapshot: AppSnapshot, now: Long = System.currentTimeMillis()): List<Reminder> {
         val current = java.time.ZonedDateTime.ofInstant(Instant.ofEpochMilli(now), zone).let { it.hour * 60 + it.minute }
-        return snapshot.reminders.filter { reminder ->
-            reminder.enabled &&
-                (reminder.weekdays.isEmpty() || reminder.weekdays.contains(localDate(now).dayOfWeek.value)) &&
-                (reminder.hour * 60 + reminder.minute >= current)
-        }.sortedWith(compareBy<Reminder> { it.hour * 60 + it.minute }.thenBy(String.CASE_INSENSITIVE_ORDER) { it.title })
+        return remindersScheduledToday(snapshot, now)
+            .filter { reminder -> reminder.enabled && reminder.hour * 60 + reminder.minute >= current }
+    }
+
+    fun remindersScheduledToday(snapshot: AppSnapshot, now: Long = System.currentTimeMillis()): List<Reminder> {
+        val weekday = localDate(now).dayOfWeek.value
+        return snapshot.reminders
+            .filter { reminder -> reminder.weekdays.isEmpty() || weekday in reminder.weekdays }
+            .sortedWith(compareBy<Reminder> { it.hour * 60 + it.minute }.thenBy(String.CASE_INSENSITIVE_ORDER) { it.title })
     }
 
     fun isProtocolDoneToday(id: String, snapshot: AppSnapshot, now: Long = System.currentTimeMillis()): Boolean =
         snapshot.protocolCompletions.any { it.protocolId == id && it.completed && sameDay(it.date, now) }
 
+    fun isProtocolOccurrenceDone(id: String, occurrenceIndex: Int, snapshot: AppSnapshot, now: Long = System.currentTimeMillis()): Boolean =
+        occurrenceDone(
+            occurrenceIndex = occurrenceIndex,
+            explicitIndices = snapshot.protocolCompletions
+                .filter { it.protocolId == id && it.completed && sameDay(it.date, now) }
+                .map { it.occurrenceIndex }
+        )
+
     fun isSupplementTakenToday(id: String, snapshot: AppSnapshot, now: Long = System.currentTimeMillis()): Boolean =
         snapshot.supplementIntakes.any { it.supplementId == id && it.taken && sameDay(it.date, now) }
+
+    fun isSupplementOccurrenceTaken(id: String, occurrenceIndex: Int, snapshot: AppSnapshot, now: Long = System.currentTimeMillis()): Boolean =
+        occurrenceDone(
+            occurrenceIndex = occurrenceIndex,
+            explicitIndices = snapshot.supplementIntakes
+                .filter { it.supplementId == id && it.taken && sameDay(it.date, now) }
+                .map { it.occurrenceIndex }
+        )
+
+    private fun occurrenceDone(occurrenceIndex: Int, explicitIndices: List<Int?>): Boolean {
+        if (occurrenceIndex in explicitIndices.filterNotNull()) return true
+        val occupied = explicitIndices.filterNotNull().toSet()
+        val legacyAssignments = generateSequence(0) { it + 1 }
+            .filterNot { it in occupied }
+            .take(explicitIndices.count { it == null })
+            .toSet()
+        return occurrenceIndex in legacyAssignments
+    }
 
     fun isScheduledToday(frequency: Frequency, fallbackDays: List<Int>, now: Long): Boolean {
         return when (frequency.kind) {
             FrequencyKind.DAILY, FrequencyKind.TIMES_PER_DAY -> true
             FrequencyKind.WEEKLY -> {
                 val days = if (frequency.days.isNotEmpty()) frequency.days else fallbackDays
-                days.isEmpty() || days.contains(localDate(now).dayOfWeek.value)
+                days.isNotEmpty() && days.contains(localDate(now).dayOfWeek.value)
             }
         }
     }
@@ -144,17 +192,17 @@ object Planner {
         return true
     }
 
-    fun frequencyLabel(frequency: Frequency): String = when (frequency.kind) {
-        FrequencyKind.DAILY -> "Quotidien"
-        FrequencyKind.TIMES_PER_DAY -> if (frequency.timesPerDay <= 1) "Quotidien" else "${frequency.timesPerDay}x / jour"
-        FrequencyKind.WEEKLY -> {
-            val labels = mapOf(1 to "Lun", 2 to "Mar", 3 to "Mer", 4 to "Jeu", 5 to "Ven", 6 to "Sam", 7 to "Dim")
-            frequency.days.mapNotNull { labels[it] }.joinToString(", ").ifBlank { "Hebdomadaire" }
-        }
-    }
-
     fun preferredMinutes(hour: Int?, minute: Int?): Int? =
         if (hour == null || minute == null) null else hour * 60 + minute
+
+    fun occurrenceId(sourceId: String, occurrenceIndex: Int): String = "$sourceId#$occurrenceIndex"
+
+    private fun occurrenceMinutes(base: Int?, index: Int, count: Int): Int? {
+        if (base == null) return null
+        if (count <= 1 || index <= 0) return base.coerceIn(0, 1439)
+        val spacing = (12 * 60 / count).coerceAtLeast(60)
+        return (base + index * spacing).coerceAtMost(1439)
+    }
 
     private fun preferredDistance(preferred: Int?, now: Long): Int {
         val current = java.time.ZonedDateTime.ofInstant(Instant.ofEpochMilli(now), zone).let { it.hour * 60 + it.minute }

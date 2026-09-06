@@ -20,7 +20,7 @@ La version 1.2.4 renforce la fiabilité des associations temporelles, améliore 
    xcodegen generate
    open BioTrack.xcodeproj
    ```
-4. Build & run the **BioTrack** scheme on an iPhone Simulator. Le schéma
+4. Build & run the **AJUSTE** app with the `BioTrack` scheme on an iPhone Simulator. Le schéma
    conserve son nom technique historique pour préserver la compatibilité.
 
 ## Fonctionnalités
@@ -63,7 +63,7 @@ BioTrack-MVP/
 
 ## Validation
 
-Le schéma `BioTrack` contient les tests unitaires du moteur statistique. La CI GitHub reconstruit l’app sur simulateur.
+Le schéma technique `BioTrack` contient les tests unitaires du moteur statistique. La CI GitHub reconstruit l’app AJUSTE sur simulateur.
 
 ```bash
 xcodebuild \

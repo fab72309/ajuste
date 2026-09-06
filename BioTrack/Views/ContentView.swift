@@ -166,7 +166,7 @@ struct OnboardingFlowView: View {
                 colors: [
                     Color("Background"),
                     Color("Background"),
-                    Color("Primary").opacity(0.10)
+                    Color.blue.opacity(0.10)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -816,9 +816,9 @@ private struct LaunchLoadingView: View {
                     Circle()
                         .fill(Color.white.opacity(0.82))
                         .frame(width: 198, height: 198)
-                        .shadow(color: Color("Secondary").opacity(glow ? 0.18 : 0.08), radius: glow ? 28 : 16, x: 0, y: 12)
+                        .shadow(color: Color.blue.opacity(glow ? 0.18 : 0.08), radius: glow ? 28 : 16, x: 0, y: 12)
                     Circle()
-                        .stroke(Color("Primary").opacity(0.14), lineWidth: 1)
+                        .stroke(Color.blue.opacity(0.14), lineWidth: 1)
                         .frame(width: 198, height: 198)
                     Image("OnboardingLogo")
                         .resizable()
@@ -838,7 +838,7 @@ private struct LaunchLoadingView: View {
 
                 ProgressView()
                     .progressViewStyle(.circular)
-                    .tint(Color("Secondary"))
+                    .tint(Color.blue)
             }
             .padding(.horizontal, 24)
         }
@@ -863,7 +863,7 @@ private struct LegalLinkButton: View {
                     .font(.caption.weight(.semibold))
             }
             .font(.footnote.weight(.semibold))
-            .foregroundColor(Color("Primary"))
+            .foregroundColor(Color.blue)
             .padding(.vertical, 4)
         }
         .buttonStyle(.plain)

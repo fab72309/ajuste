@@ -14,14 +14,14 @@ struct FrequencyPickerSheet: View {
             List {
                 selectableRow(title: "Quotidienne", selected: isSelected(.daily)) { working = .daily }
                 selectableRow(title: "Plusieurs fois par jour", selected: isTimesPerDay) { if !isTimesPerDay { working = .timesPerDay(2) } }
-                selectableRow(title: "Si besoin", selected: false) { /* as-needed: store as weekly with empty days to denote ad-hoc */ working = .weekly(days: []) }
+                selectableRow(title: "Si besoin", selected: working.isAsNeeded) { working = .weekly(days: []) }
                 if case .timesPerDay(let n) = working {
                     Stepper(value: Binding(get: { n }, set: { working = .timesPerDay(max(1, $0)) }), in: 1...12) {
                         Text("Prises par jour: \(n)")
                     }
                 }
-                selectableRow(title: "Jour(s) spécifique(s)", selected: isWeekly) { if !isWeekly { working = .weekly(days: [2]) } }
-                if case .weekly(let days) = working {
+                selectableRow(title: "Jour(s) spécifique(s)", selected: working.hasSpecificDays) { if !working.hasSpecificDays { working = .weekly(days: [2]) } }
+                if case .weekly(let days) = working, !days.isEmpty {
                     WeekdayPicker(selection: Binding(get: { Set(days) }, set: { working = .weekly(days: Array($0).sorted()) }))
                         .padding(.vertical, 4)
                 }
@@ -34,8 +34,6 @@ struct FrequencyPickerSheet: View {
         if case .timesPerDay = working { return true }
         return false
     }
-    private var isTimesPerWeek: Bool { false }
-    private var isWeekly: Bool { if case .weekly = working { return true }; return false }
 
     private func isSelected(_ candidate: Frequency) -> Bool { working == candidate }
 
@@ -95,5 +93,4 @@ struct WeekdayPicker: View {
         .padding(.vertical, 4)
     }
 }
-
 

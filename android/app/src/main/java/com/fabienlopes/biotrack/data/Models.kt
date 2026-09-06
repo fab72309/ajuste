@@ -57,6 +57,17 @@ data class Frequency(
     val days: List<Int> = emptyList(),
     val timesPerDay: Int = 1
 ) {
+    /** `weekly(days = [])` is the persisted, backward-compatible "as needed" value. */
+    val isAsNeeded: Boolean
+        get() = kind == FrequencyKind.WEEKLY && days.isEmpty()
+
+    val hasSpecificDays: Boolean
+        get() = kind == FrequencyKind.WEEKLY && days.isNotEmpty()
+
+    /** The number of occurrences represented by this frequency on a scheduled day. */
+    val effectiveTimesPerDay: Int
+        get() = if (kind == FrequencyKind.TIMES_PER_DAY) timesPerDay.coerceAtLeast(1) else 1
+
     companion object {
         fun daily() = Frequency()
         fun weekly(days: List<Int>) = Frequency(FrequencyKind.WEEKLY, days.distinct().sorted())
@@ -68,6 +79,20 @@ data class Frequency(
 data class ActivationSpan(
     val start: Long,
     val end: Long? = null
+)
+
+/**
+ * Optional reminder settings attached to an item or reusable template.
+ * Weekdays use ISO values: 1 = Monday through 7 = Sunday. An empty list means every day.
+ */
+@Serializable
+data class ItemReminderConfig(
+    val enabled: Boolean = true,
+    val title: String? = null,
+    val notes: String? = null,
+    val hour: Int = 8,
+    val minute: Int = 0,
+    val weekdays: List<Int> = emptyList()
 )
 
 @Serializable
@@ -88,7 +113,8 @@ data class ProtocolItem(
     val endDate: Long? = null,
     val active: Boolean = true,
     val activationSpans: List<ActivationSpan> = emptyList(),
-    val category: String? = null
+    val category: String? = null,
+    val customReminder: ItemReminderConfig? = null
 )
 
 @Serializable
@@ -96,7 +122,11 @@ data class ProtocolCompletion(
     val id: String = newId(),
     val protocolId: String,
     val date: Long = System.currentTimeMillis(),
-    val completed: Boolean = true
+    val completed: Boolean = true,
+    val occurrenceIndex: Int? = null,
+    val notes: String? = null,
+    val goal: String? = null,
+    val intervention: String? = null
 )
 
 @Serializable
@@ -108,7 +138,11 @@ data class CustomProtocolTemplate(
     val minutes: Int = 10,
     val frequency: Frequency = Frequency.daily(),
     val hour: Int = 8,
-    val minute: Int = 0
+    val minute: Int = 0,
+    val goal: String? = null,
+    val intervention: String? = null,
+    val notes: String? = null,
+    val customReminder: ItemReminderConfig? = null
 )
 
 @Serializable
@@ -126,7 +160,8 @@ data class Supplement(
     val durationNote: String? = null,
     val notes: String? = null,
     val active: Boolean = true,
-    val activationSpans: List<ActivationSpan> = emptyList()
+    val activationSpans: List<ActivationSpan> = emptyList(),
+    val customReminder: ItemReminderConfig? = null
 )
 
 @Serializable
@@ -134,7 +169,11 @@ data class SupplementIntake(
     val id: String = newId(),
     val supplementId: String,
     val date: Long = System.currentTimeMillis(),
-    val taken: Boolean = true
+    val taken: Boolean = true,
+    val occurrenceIndex: Int? = null,
+    val dose: String? = null,
+    val brand: String? = null,
+    val notes: String? = null
 )
 
 @Serializable
@@ -145,8 +184,17 @@ data class CustomSupplementTemplate(
     val dose: String? = null,
     val category: String = "Autre",
     val timeContext: String? = null,
-    val frequency: Frequency = Frequency.daily()
+    val frequency: Frequency = Frequency.daily(),
+    val timeOfDay: Int? = null,
+    val timesPerDay: Int? = null,
+    val daysOfWeek: List<Int>? = null,
+    val durationNote: String? = null,
+    val notes: String? = null,
+    val customReminder: ItemReminderConfig? = null
 )
+
+@Serializable
+enum class ReminderTargetKind { PROTOCOL, SUPPLEMENT }
 
 @Serializable
 data class Reminder(
@@ -157,7 +205,9 @@ data class Reminder(
     val minute: Int,
     val weekdays: List<Int> = emptyList(),
     val notes: String? = null,
-    val enabled: Boolean = true
+    val enabled: Boolean = true,
+    val targetKind: ReminderTargetKind? = null,
+    val targetId: String? = null
 )
 
 @Serializable
@@ -262,7 +312,7 @@ data class RecommendationItem(
 
 @Serializable
 data class AppSnapshot(
-    val schemaVersion: Int = 3,
+    val schemaVersion: Int = 4,
     val protocols: List<ProtocolItem> = emptyList(),
     val customProtocolTemplates: List<CustomProtocolTemplate> = emptyList(),
     val protocolCompletions: List<ProtocolCompletion> = emptyList(),

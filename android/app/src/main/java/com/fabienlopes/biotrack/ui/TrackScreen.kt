@@ -1,7 +1,9 @@
 package com.fabienlopes.biotrack.ui
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
+import android.app.DatePickerDialog
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,21 +11,20 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,27 +41,46 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.fabienlopes.biotrack.R
 import com.fabienlopes.biotrack.data.BioTrackViewModel
 import com.fabienlopes.biotrack.data.Metric
+import com.fabienlopes.biotrack.data.MetricEntry
 import com.fabienlopes.biotrack.data.MetricKind
-import com.fabienlopes.biotrack.domain.Statistics
+import com.fabienlopes.biotrack.domain.HistoryPeriod
+import com.fabienlopes.biotrack.domain.TrackingAnalytics
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
 fun TrackScreen(viewModel: BioTrackViewModel) {
     val snapshot by viewModel.snapshot.collectAsState()
+    val context = LocalContext.current
     var selectedMetricId by remember(snapshot.metrics) { mutableStateOf(snapshot.metrics.firstOrNull()?.id) }
-    var addMetric by remember { mutableStateOf(false) }
+    var selectedDate by remember { mutableStateOf(System.currentTimeMillis()) }
+    var showCreateMetric by remember { mutableStateOf(false) }
+    var showFilters by remember { mutableStateOf(false) }
     var addEntryFor by remember { mutableStateOf<String?>(null) }
+    var editingEntry by remember { mutableStateOf<MetricEntry?>(null) }
+    var deleteEntry by remember { mutableStateOf<MetricEntry?>(null) }
+    var historyMetricId by remember { mutableStateOf<String?>(null) }
+    var categories by remember { mutableStateOf(emptySet<String>()) }
+    var historyPeriod by remember { mutableStateOf(HistoryPeriod.ALL) }
+    var entriesToShow by remember { mutableStateOf(10) }
+    var csvToWrite by remember { mutableStateOf<String?>(null) }
+    val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri: Uri? ->
+        val payload = csvToWrite
+        if (uri != null && payload != null) context.contentResolver.openOutputStream(uri)?.writer()?.use { it.write(payload) }
+        csvToWrite = null
+    }
     val selectedMetric = snapshot.metrics.firstOrNull { it.id == selectedMetricId } ?: snapshot.metrics.firstOrNull()
+    val filteredEntries = TrackingAnalytics.filterHistory(snapshot.metricEntries, snapshot.metrics, historyMetricId, categories, historyPeriod)
 
     LazyColumn(
         contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 14.dp),
@@ -69,59 +89,56 @@ fun TrackScreen(viewModel: BioTrackViewModel) {
         item {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Suivi", style = MaterialTheme.typography.headlineSmall, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-                    Text("Métriques et observations quotidiennes", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+                    Text(stringResource(R.string.tracking_title), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.tracking_subtitle), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
                 }
-                IconButton(onClick = { addMetric = true }) { Icon(Icons.Default.Add, contentDescription = "Créer une métrique") }
+                IconButton(onClick = { showCreateMetric = true }) { Icon(Icons.Default.Add, contentDescription = stringResource(R.string.create_metric)) }
+            }
+        }
+        item {
+            BioCard {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(stringResource(R.string.entry_date), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(formatDate(selectedDate), fontWeight = FontWeight.SemiBold)
+                    }
+                    OutlinedButton(onClick = { showDatePicker(context, selectedDate) { selectedDate = it } }) {
+                        Icon(Icons.Default.CalendarMonth, contentDescription = null)
+                        Spacer(Modifier.width(6.dp))
+                        Text(stringResource(R.string.choose))
+                    }
+                }
             }
         }
         if (snapshot.metrics.isEmpty()) {
             item {
-                BioCard { Text("Créez votre première métrique pour commencer à observer vos données.", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                BioCard {
+                    Text(stringResource(R.string.first_metric_empty), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Spacer(Modifier.height(10.dp))
+                    Button(onClick = { showCreateMetric = true }) { Text(stringResource(R.string.create_metric)) }
+                }
             }
         } else {
             item {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 1.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                     items(snapshot.metrics, key = { it.id }) { metric ->
-                        FilterChip(
-                            selected = metric.id == selectedMetric?.id,
-                            onClick = { selectedMetricId = metric.id },
-                            label = { Text(metric.name, maxLines = 1) },
-                            leadingIcon = if (metric.id == selectedMetric?.id) ({ Icon(Icons.Default.Tune, contentDescription = null, modifier = Modifier.size(16.dp)) }) else null
-                        )
+                        FilterChip(selected = metric.id == selectedMetric?.id, onClick = { selectedMetricId = metric.id }, label = { Text(metric.name, maxLines = 1) })
                     }
                 }
             }
             selectedMetric?.let { metric ->
-                item {
-                    MetricChartCard(metric, snapshot, onAdd = { addEntryFor = metric.id })
-                }
+                item { MetricTrendCard(metric, snapshot) { addEntryFor = metric.id } }
                 item {
                     BioCard {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(metric.name, style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-                                Text("Entrées récentes", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(stringResource(R.string.new_measurement), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                                Text(stringResource(R.string.metric_date, metric.name, formatDate(selectedDate)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
-                            OutlinedButton(onClick = { addEntryFor = metric.id }) { Icon(Icons.Default.Add, contentDescription = null); Spacer(Modifier.width(4.dp)); Text("Ajouter") }
-                        }
-                        val entries = snapshot.metricEntries.filter { it.metricId == metric.id }.sortedByDescending { it.date }.take(12)
-                        if (entries.isEmpty()) {
-                            Spacer(Modifier.height(12.dp))
-                            Text("Aucune entrée pour le moment.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        } else {
-                            entries.forEach { entry ->
-                                Row(modifier = Modifier.fillMaxWidth().padding(vertical = 7.dp), verticalAlignment = Alignment.CenterVertically) {
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(formatDate(entry.date), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                        entry.notes?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
-                                    }
-                                    Text(formatValue(entry.value, metric.kind, metric.unit), fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
-                                }
+                            Button(onClick = { addEntryFor = metric.id }) {
+                                Icon(Icons.Default.Add, contentDescription = null)
+                                Spacer(Modifier.width(4.dp))
+                                Text(stringResource(R.string.add))
                             }
                         }
                     }
@@ -130,156 +147,126 @@ fun TrackScreen(viewModel: BioTrackViewModel) {
         }
         item {
             BioCard {
-                Text("Check-ins récents", style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-                snapshot.dailyCheckIns.sortedByDescending { it.date }.take(4).forEach { checkIn ->
-                    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 7.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Text("${formatDate(checkIn.date)} · ${checkIn.period.displayName}", modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodySmall)
-                        Text("Énergie ${checkIn.energy}/10 · Humeur ${checkIn.mood}/10", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(stringResource(R.string.history), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text(pluralStringResource(R.plurals.filtered_entries, filteredEntries.size, filteredEntries.size), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    IconButton(onClick = { showFilters = true }) { Icon(Icons.Default.Tune, contentDescription = stringResource(R.string.filter_history)) }
+                    IconButton(onClick = {
+                        csvToWrite = TrackingAnalytics.metricsCsv(snapshot.metrics, filteredEntries)
+                        exportLauncher.launch("ajuste-suivi.csv")
+                    }, enabled = filteredEntries.isNotEmpty()) { Icon(Icons.Default.FileDownload, contentDescription = stringResource(R.string.export_history_csv)) }
+                }
+                if (filteredEntries.isEmpty()) {
+                    Spacer(Modifier.height(10.dp))
+                    Text(stringResource(R.string.no_filtered_data), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                } else {
+                    filteredEntries.take(entriesToShow).forEach { entry ->
+                        val metric = snapshot.metrics.firstOrNull { it.id == entry.metricId }
+                        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 7.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(metric?.name ?: stringResource(R.string.deleted_metric), fontWeight = FontWeight.SemiBold)
+                                Text(stringResource(R.string.entry_date_source, formatDate(entry.date), sourceLabel(entry)), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                entry.notes?.takeIf { isManualSource(entry) }?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                            }
+                            Text(metric?.let { formatValue(entry.value, it.kind, it.unit) } ?: entry.value.toString(), fontWeight = FontWeight.SemiBold)
+                            IconButton(onClick = { editingEntry = entry }) { Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit_entry)) }
+                            IconButton(onClick = { deleteEntry = entry }) { Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete_entry)) }
+                        }
+                    }
+                    if (entriesToShow < filteredEntries.size) {
+                        OutlinedButton(onClick = { entriesToShow += 10 }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.show_ten_more)) }
                     }
                 }
-                if (snapshot.dailyCheckIns.isEmpty()) Text("Les check-ins du jour apparaissent ici.", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-    }
-
-    if (addMetric) {
-        AddMetricDialog(onDismiss = { addMetric = false }) { name, kind, unit ->
-            viewModel.addMetric(name, kind, unit)
-            addMetric = false
-        }
-    }
-    addEntryFor?.let { metricId ->
-        val metric = snapshot.metrics.firstOrNull { it.id == metricId }
-        if (metric != null) AddEntryDialog(metric, onDismiss = { addEntryFor = null }) { value, notes ->
-            viewModel.addMetricEntry(metric.id, value, notes)
-            addEntryFor = null
-        }
-    }
-}
-
-@Composable
-private fun MetricChartCard(metric: Metric, snapshot: com.fabienlopes.biotrack.data.AppSnapshot, onAdd: () -> Unit) {
-    val series = Statistics.chartSeries(snapshot, metric.id)
-    BioCard {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text("${metric.name} · 30 jours", style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-                Text(if (series.isEmpty()) "Pas encore assez de données" else "${series.size} jours mesurés", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            IconButton(onClick = onAdd) { Icon(Icons.Default.Add, contentDescription = "Ajouter une entrée") }
-        }
-        Spacer(Modifier.height(12.dp))
-        if (series.size >= 2) {
-            val values = series.map { it.value }
-            val median = values.sorted()[values.lastIndex / 2]
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(
-                    modifier = Modifier.width(52.dp).height(180.dp),
-                    verticalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(formatValue(values.maxOrNull() ?: 0.0, metric.kind, metric.unit), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
-                    Text(formatValue(median, metric.kind, metric.unit), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
-                    Text(formatValue(values.minOrNull() ?: 0.0, metric.kind, metric.unit), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+        item {
+            BioCard {
+                Text(stringResource(R.string.recent_checkins), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                snapshot.dailyCheckIns.sortedByDescending { it.date }.take(4).forEach { checkIn ->
+                    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 7.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(R.string.checkin_date_period, formatDate(checkIn.date), checkInPeriodLabel(checkIn.period)), modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodySmall)
+                        Text(stringResource(R.string.checkin_scores, checkIn.energy, checkIn.mood), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
-                LineChart(series, modifier = Modifier.weight(1f).height(180.dp))
+                if (snapshot.dailyCheckIns.isEmpty()) Text(stringResource(R.string.checkins_empty), color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Row(modifier = Modifier.padding(start = 52.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(formatChartDate(series.first().day), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(formatChartDate(series.last().day), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("Début · ${formatValue(series.first().value, metric.kind, metric.unit)}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text("Fin · ${formatValue(series.last().value, metric.kind, metric.unit)}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            if (series.zipWithNext().any { (left, right) -> daysBetween(left.day, right.day) > 1 }) {
-                Text("Les segments interrompus indiquent un jour sans saisie.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-        } else {
-            Text("Ajoutez au moins deux journées pour afficher la tendance.", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
-}
 
-@Composable
-private fun LineChart(points: List<com.fabienlopes.biotrack.domain.ChartPoint>, modifier: Modifier = Modifier) {
-    val primary = MaterialTheme.colorScheme.primary
-    val outline = MaterialTheme.colorScheme.outline
-    Canvas(modifier = modifier) {
-        if (points.size < 2) return@Canvas
-        val values = points.map { it.value }
-        val minValue = values.minOrNull() ?: 0.0
-        val maxValue = values.maxOrNull() ?: 1.0
-        val spread = (maxValue - minValue).takeIf { it > 0.000001 } ?: 1.0
-        val startDay = points.first().day
-        val daySpan = (points.last().day - startDay).coerceAtLeast(1L)
-        val chartHeight = size.height - 12.dp.toPx()
-        val yFor = { value: Double -> size.height - ((value - minValue) / spread).toFloat() * chartHeight - 6.dp.toPx() }
-        listOf(0f, 0.5f, 1f).forEach { fraction ->
-            val y = 6.dp.toPx() + chartHeight * (1f - fraction)
-            drawLine(outline.copy(alpha = if (fraction == 0.5f) 0.4f else 0.18f), Offset(0f, y), Offset(size.width, y), strokeWidth = 1.dp.toPx())
+    if (showCreateMetric) AddMetricDialog(onDismiss = { showCreateMetric = false }) { name, kind, unit ->
+        viewModel.addMetric(name, kind, unit)
+        showCreateMetric = false
+    }
+    addEntryFor?.let { metricId -> snapshot.metrics.firstOrNull { it.id == metricId }?.let { metric ->
+        MetricEntryDialog(stringResource(R.string.add_metric_entry_title, metric.name), metric, null, { addEntryFor = null }) { value, notes ->
+            viewModel.addMetricEntry(metric.id, value, notes, selectedDate)
+            addEntryFor = null
+            entriesToShow = 10
         }
-        val path = Path()
-        points.forEachIndexed { index, point ->
-            val x = size.width * ((point.day - startDay).toFloat() / daySpan.toFloat())
-            val y = yFor(point.value)
-            val hasGap = index > 0 && daysBetween(points[index - 1].day, point.day) > 1
-            if (index == 0 || hasGap) path.moveTo(x, y) else path.lineTo(x, y)
+    } }
+    editingEntry?.let { entry -> snapshot.metrics.firstOrNull { it.id == entry.metricId }?.let { metric ->
+        MetricEntryDialog(stringResource(R.string.edit_metric_entry_title, metric.name), metric, entry, { editingEntry = null }) { value, notes ->
+            viewModel.updateMetricEntry(entry.copy(value = value, notes = notes))
+            editingEntry = null
         }
-        drawPath(path, primary, style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round))
-        points.forEach { point ->
-            val x = size.width * ((point.day - startDay).toFloat() / daySpan.toFloat())
-            val y = yFor(point.value)
-            drawCircle(primary, radius = 3.dp.toPx(), center = Offset(x, y))
-        }
+    } }
+    deleteEntry?.let { entry ->
+        AlertDialog(
+            onDismissRequest = { deleteEntry = null },
+            title = { Text(stringResource(R.string.delete_entry_title)) },
+            text = { Text(stringResource(R.string.delete_entry_message, snapshot.metrics.firstOrNull { it.id == entry.metricId }?.name ?: stringResource(R.string.generic_metric), formatDate(entry.date))) },
+            confirmButton = { TextButton(onClick = { viewModel.deleteMetricEntry(entry.id); deleteEntry = null }) { Text(stringResource(R.string.delete)) } },
+            dismissButton = { TextButton(onClick = { deleteEntry = null }) { Text(stringResource(R.string.cancel)) } }
+        )
+    }
+    if (showFilters) HistoryFilterDialog(snapshot.metrics, historyMetricId, categories, historyPeriod, { showFilters = false }) { metricId, selectedCategories, selectedPeriod ->
+        historyMetricId = metricId
+        categories = selectedCategories
+        historyPeriod = selectedPeriod
+        entriesToShow = 10
+        showFilters = false
     }
 }
-
-private val chartDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM", Locale.FRENCH)
-
-private fun formatChartDate(timestamp: Long): String = chartDateFormatter.format(Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault()))
-
-private fun daysBetween(start: Long, end: Long): Long = java.time.temporal.ChronoUnit.DAYS.between(
-    Instant.ofEpochMilli(start).atZone(ZoneId.systemDefault()).toLocalDate(),
-    Instant.ofEpochMilli(end).atZone(ZoneId.systemDefault()).toLocalDate()
-)
 
 @Composable
 private fun AddMetricDialog(onDismiss: () -> Unit, onSave: (String, MetricKind, String?) -> Unit) {
     var name by remember { mutableStateOf("") }
     var unit by remember { mutableStateOf("") }
     var duration by remember { mutableStateOf(false) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Créer une métrique") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedTextField(name, { name = it }, label = { Text("Nom") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                OutlinedTextField(unit, { unit = it }, label = { Text("Unité (facultatif)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    androidx.compose.material3.Checkbox(checked = duration, onCheckedChange = { duration = it })
-                    Text("Durée en heures/minutes")
-                }
-            }
-        },
-        confirmButton = { Button(onClick = { onSave(name, if (duration) MetricKind.HOURS_MINUTES else MetricKind.NUMBER, unit.takeIf { it.isNotBlank() }) }, enabled = name.isNotBlank()) { Text("Créer") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Annuler") } }
-    )
+    AlertDialog(onDismissRequest = onDismiss, title = { Text(stringResource(R.string.create_metric)) }, text = {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            OutlinedTextField(name, { name = it }, label = { Text(stringResource(R.string.name_field)) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            OutlinedTextField(unit, { unit = it }, label = { Text(stringResource(R.string.unit_optional)) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            Row(verticalAlignment = Alignment.CenterVertically) { Checkbox(duration, { duration = it }); Text(stringResource(R.string.duration_hours_minutes)) }
+        }
+    }, confirmButton = { Button(onClick = { onSave(name, if (duration) MetricKind.HOURS_MINUTES else MetricKind.NUMBER, unit.takeIf { it.isNotBlank() }) }, enabled = name.isNotBlank()) { Text(stringResource(R.string.create)) } }, dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } })
+}
+
+private fun showDatePicker(context: android.content.Context, timestamp: Long, onSelected: (Long) -> Unit) {
+    val zone = ZoneId.systemDefault()
+    val current = Instant.ofEpochMilli(timestamp).atZone(zone).toLocalDate()
+    DatePickerDialog(context, { _, year, month, day -> onSelected(LocalDate.of(year, month + 1, day).atStartOfDay(zone).toInstant().toEpochMilli()) }, current.year, current.monthValue - 1, current.dayOfMonth).apply {
+        datePicker.maxDate = System.currentTimeMillis()
+    }.show()
+}
+
+private fun isManualSource(entry: MetricEntry): Boolean {
+    val notes = entry.notes.orEmpty().trim().lowercase(Locale.ROOT)
+    return !isCheckInSource(notes) && notes != "hk" && "health" !in notes && !notes.startsWith("import:")
 }
 
 @Composable
-private fun AddEntryDialog(metric: Metric, onDismiss: () -> Unit, onSave: (Double, String?) -> Unit) {
-    var value by remember { mutableStateOf("") }
-    var notes by remember { mutableStateOf("") }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Ajouter · ${metric.name}") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedTextField(value, { value = it }, label = { Text(if (metric.kind == MetricKind.HOURS_MINUTES) "Valeur en minutes" else "Valeur") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                OutlinedTextField(notes, { notes = it }, label = { Text("Note (facultatif)") }, modifier = Modifier.fillMaxWidth(), minLines = 2)
-            }
-        },
-        confirmButton = { Button(onClick = { value.toDoubleOrNull()?.let { onSave(it, notes.takeIf { it.isNotBlank() }) } }, enabled = value.toDoubleOrNull() != null) { Text("Ajouter") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Annuler") } }
-    )
+private fun sourceLabel(entry: MetricEntry): String {
+    val notes = entry.notes.orEmpty().trim().lowercase(Locale.ROOT)
+    return stringResource(when {
+        isCheckInSource(notes) -> R.string.source_checkin
+        notes == "hk" || "health" in notes -> R.string.source_health
+        notes.startsWith("import:") -> R.string.source_import
+        else -> R.string.source_manual
+    })
 }
+
+private fun isCheckInSource(normalizedNotes: String): Boolean =
+    normalizedNotes.startsWith("check-in ") || normalizedNotes.startsWith("checkin:")

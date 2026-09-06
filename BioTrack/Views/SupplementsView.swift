@@ -187,7 +187,10 @@ extension SupplementsView {
 		if !categoryFilters.isEmpty { items = items.filter { s in (s.category?.lowercased()).map { categoryFilters.contains($0) } ?? false } }
 		let todaysWeekday = ((Calendar.current.component(.weekday, from: Date()) + 5) % 7) + 1
 		func scheduledToday(_ s: Supplement) -> Bool {
-			switch s.frequency { case .daily, .timesPerDay: return true; case .weekly(let days): let set = Set((!days.isEmpty ? days : (s.daysOfWeek ?? [])).map { $0 }); return set.isEmpty || set.contains(todaysWeekday) }
+			// The catalog should keep ad-hoc supplements visible even though they
+			// are intentionally absent from the daily checklist.
+			if s.frequency.isAsNeeded { return true }
+			switch s.frequency { case .daily, .timesPerDay: return true; case .weekly(let days): let set = Set((!days.isEmpty ? days : (s.daysOfWeek ?? [])).map { $0 }); return !set.isEmpty && set.contains(todaysWeekday) }
 		}
 		items = items.filter { scheduledToday($0) }
 		var grouped: [String: [Supplement]] = [:]

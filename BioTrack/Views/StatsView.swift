@@ -784,7 +784,7 @@ struct StatsView: View {
             return true
         case .weekly(let days):
             let selected = Set(days)
-            return selected.isEmpty || selected.contains(DailyPlanner.currentWeekdayMon1ToSun7(now: date))
+            return !selected.isEmpty && selected.contains(DailyPlanner.currentWeekdayMon1ToSun7(now: date))
         }
     }
 
