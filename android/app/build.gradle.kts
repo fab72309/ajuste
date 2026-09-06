@@ -23,7 +23,7 @@ android {
         applicationId = "com.fabienlopes.biotrack"
         minSdk = 28
         targetSdk = 36
-        versionCode = 9
+        versionCode = 10
         versionName = "1.2.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

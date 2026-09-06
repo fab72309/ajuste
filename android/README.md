@@ -12,7 +12,7 @@ Ouvrir le dossier `android/` dans Android Studio, avec un JDK 17 et les SDK Andr
 ./gradlew bundleRelease
 ```
 
-L’application utilise `com.fabienlopes.biotrack`, `versionName 1.2.4` et `versionCode 9`, alignés sur la release iOS actuelle. Le bundle Play Store attendu est `app/build/outputs/bundle/release/app-release.aab`.
+L’application utilise `com.fabienlopes.biotrack`, `versionName 1.2.4` et `versionCode 10`, alignés sur la release iOS actuelle. Le bundle Play Store attendu est `app/build/outputs/bundle/release/app-release.aab`.
 
 ## Données et permissions
 

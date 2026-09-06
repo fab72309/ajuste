@@ -3,7 +3,7 @@
 ## État de la cible
 
 - Application ID : `com.fabienlopes.biotrack`
-- Version : `1.2.4` / `versionCode 9`
+- Version : `1.2.4` / `versionCode 10`
 - Format de livraison : Android App Bundle (`.aab`)
 - Données : stockage privé local ; aucun compte AJUSTE, backend ou permission Internet
 - Santé : lecture facultative via Health Connect, avec permissions limitées aux types réellement utilisés
