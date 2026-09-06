@@ -125,7 +125,7 @@ enum DailyPlanner {
                 return true
             case .weekly(let days):
                 let set = Set(days)
-                if set.isEmpty { return true }
+                if set.isEmpty { return false }
                 return set.contains(currentWeekdayMon1ToSun7(now: now))
             }
         }
@@ -169,7 +169,7 @@ enum DailyPlanner {
             return "Quotidien"
         case .weekly(let days):
             let map = [1: "Lun", 2: "Mar", 3: "Mer", 4: "Jeu", 5: "Ven", 6: "Sam", 7: "Dim"]
-            return days.map { map[$0] ?? "" }.joined(separator: ", ")
+            return days.isEmpty ? "Si besoin" : days.map { map[$0] ?? "" }.joined(separator: ", ")
         case .timesPerDay(let value):
             return value <= 1 ? "Quotidien" : "\(value)x / jour"
         }
@@ -186,7 +186,7 @@ enum DailyPlanner {
             return true
         case .weekly(let days):
             let set = Set((!days.isEmpty ? days : (daysFallback ?? [])))
-            if set.isEmpty { return true }
+            if set.isEmpty { return false }
             return set.contains(currentWeekdayMon1ToSun7(now: now))
         }
     }

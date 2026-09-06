@@ -87,7 +87,7 @@ private struct ReminderSheetContent: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Toggle("", isOn: $notificationsEnabled).labelsHidden()
                         // Alerte autorisation (réutiliser contenu simple sans dépendre de la vue d'origine)
-                        Text("Assurez-vous que les notifications iOS sont activées pour BioTrack.")
+                        Text("Assurez-vous que les notifications iOS sont activées pour AJUSTE.")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
@@ -138,5 +138,4 @@ private struct QuickButtons: View {
         }
     }
 }
-
 

@@ -252,7 +252,7 @@ struct SettingsView: View {
             .fileExporter(isPresented: $showingExport,
                           document: exportDocument,
                           contentType: .json,
-                          defaultFilename: "biotrack-backup") { result in
+                          defaultFilename: "ajuste-backup") { result in
                 if case let .failure(error) = result {
                     importStatusMessage = "Export échoué: \(error.localizedDescription)"
                     showingImportAlert = true
@@ -261,7 +261,7 @@ struct SettingsView: View {
             .fileExporter(isPresented: $showingSecureExport,
                           document: secureExportDocument,
                           contentType: .json,
-                          defaultFilename: "biotrack-backup-secure") { result in
+                          defaultFilename: "ajuste-backup-secure") { result in
                 if case let .failure(error) = result {
                     importStatusMessage = "Export chiffré échoué: \(error.localizedDescription)"
                     showingImportAlert = true

@@ -344,15 +344,15 @@ async function dispatchConfirmation({ lead, confirmationUrl, webhookUrl }) {
       });
 
       if (!response.ok) {
-        console.error(`[BioTrack] Confirmation webhook failed with status ${response.status}`);
+        console.error(`[AJUSTE] Confirmation webhook failed with status ${response.status}`);
       }
       return;
     } catch (error) {
-      console.error('[BioTrack] Confirmation webhook request failed:', error.message);
+      console.error('[AJUSTE] Confirmation webhook request failed:', error.message);
     }
   }
 
-  console.info(`[BioTrack] Double opt-in URL for ${lead.email}: ${confirmationUrl}`);
+  console.info(`[AJUSTE] Double opt-in URL for ${lead.email}: ${confirmationUrl}`);
 }
 
 function defaultNotFoundPage() {
@@ -645,7 +645,7 @@ export async function startLandingServer(options = {}) {
     server.listen(port, host, resolve);
   });
 
-  console.info(`BioTrack landing running on http://${host}:${port}`);
+  console.info(`AJUSTE landing running on http://${host}:${port}`);
   return server;
 }
 

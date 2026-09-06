@@ -1,4 +1,4 @@
-# BioTrack — priorité 1 avant soumission
+# AJUSTE — priorité 1 avant soumission
 
 Ce document couvre les actions a terminer avant une premiere soumission TestFlight externe / App Store.
 
@@ -40,14 +40,14 @@ Si tu veux utiliser un autre namespace (ex. domaine perso / societe), change ces
 
 ## Xcode (manuel)
 
-1. Ouvrir le target app `BioTrack`
+1. Ouvrir le target app `AJUSTE`
 - `Signing & Capabilities`:
   - choisir la bonne Team
   - verifier `Bundle Identifier = com.fabienlopes.biotrack`
   - verifier HealthKit
   - verifier App Group
 
-2. Ouvrir le target widget `BioTrackWidgetExtension`
+2. Ouvrir le target widget `AJUSTEWidgetExtension`
 - `Signing & Capabilities`:
   - verifier `Bundle Identifier = com.fabienlopes.biotrack.widget`
   - verifier App Group
@@ -70,16 +70,16 @@ Pages preparees dans `docs/`:
 
 URLs :
 
-- `https://fab72309.github.io/biotrack/privacy-policy.html`
-- `https://fab72309.github.io/biotrack/support.html`
-- `https://fab72309.github.io/biotrack/`
+- `https://fab72309.github.io/ajuste/privacy-policy.html`
+- `https://fab72309.github.io/ajuste/support.html`
+- `https://fab72309.github.io/ajuste/`
 
 ## App Store Connect - App Privacy (manuel)
 
 Preparer les reponses en les alignant avec le comportement reel de l'app:
 
 - Donnees stockees localement sur l'appareil
-- Pas de compte / pas de backend BioTrack (selon l'etat actuel du projet)
+- Pas de compte / pas de backend AJUSTE (selon l'etat actuel du projet)
 - Donnees Sante utilisees localement apres consentement
 - Notifications locales (rappels)
 - Export manuel initie par l'utilisateur

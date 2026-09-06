@@ -4,7 +4,8 @@ import UserNotifications
 struct ContentView: View {
     @AppStorage("hasCompletedInitialOnboarding") private var hasCompletedInitialOnboarding: Bool = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var showLaunchOverlay = true
+    @State private var showLaunchOverlay =
+        !ProcessInfo.processInfo.arguments.contains("-appStoreScreenshots")
 
     var body: some View {
         ZStack {
@@ -759,9 +760,9 @@ enum LegalDocument: String, Identifiable {
 }
 
 enum BioTrackLinks {
-    static let privacyPolicy = URL(string: "https://fab72309.github.io/biotrack/privacy-policy.html")!
-    static let support = URL(string: "https://fab72309.github.io/biotrack/support.html")!
-    static let issueTracker = URL(string: "https://github.com/fab72309/biotrack/issues/new/choose")!
+    static let privacyPolicy = URL(string: "https://fab72309.github.io/ajuste/privacy-policy.html")!
+    static let support = URL(string: "https://fab72309.github.io/ajuste/support.html")!
+    static let issueTracker = URL(string: "https://github.com/fab72309/ajuste/issues/new/choose")!
     static let standardEULA = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
 }
 

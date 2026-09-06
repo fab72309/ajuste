@@ -117,7 +117,7 @@ private struct NotificationWarningView: View {
         Group {
             if status == .denied || status == .notDetermined {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Les notifications ne sont pas activées pour BioTrack.")
+                    Text("Les notifications ne sont pas activées pour AJUSTE.")
                         .font(.footnote)
                         .foregroundColor(.secondary)
                     Button(status == .notDetermined ? "Autoriser les notifications" : "Activer dans Réglages") {

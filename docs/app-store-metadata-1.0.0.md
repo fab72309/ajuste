@@ -1,11 +1,11 @@
-# Métadonnées App Store — BioTrack 1.0.0
+# Métadonnées App Store — AJUSTE 1.0.0
 
 Ce document regroupe les champs prêts à copier dans App Store Connect. La langue
 principale proposée est le français.
 
 ## Identité
 
-- Nom : `BioTrack`
+- Nom : `AJUSTE`
 - Sous-titre : `Routines & données privées`
 - Catégorie principale : `Santé et remise en forme`
 - Catégorie secondaire proposée : `Style de vie`
@@ -17,13 +17,13 @@ principale proposée est le français.
 - Version : `1.0.0`
 - Build : `3`
 - Bundle ID : `com.fabienlopes.biotrack`
-- SKU proposé si aucune fiche n’existe : `BIOTRACK-IOS-001`
+- SKU proposé si aucune fiche n’existe : `AJUSTE-IOS-001`
 
 ## URLs
 
-- Marketing : `https://fab72309.github.io/biotrack/`
-- Support : `https://fab72309.github.io/biotrack/support.html`
-- Confidentialité : `https://fab72309.github.io/biotrack/privacy-policy.html`
+- Marketing : `https://fab72309.github.io/ajuste/`
+- Support : `https://fab72309.github.io/ajuste/support.html`
+- Confidentialité : `https://fab72309.github.io/ajuste/privacy-policy.html`
 
 Le canal de support public actuel est GitHub Issues. Avant la soumission, vérifier
 si le territoire de distribution exige aussi l’affichage d’une adresse postale,
@@ -37,7 +37,7 @@ d’un e-mail ou d’un numéro de téléphone.
 
 ## Description
 
-BioTrack vous aide à suivre vos routines et vos indicateurs de bien-être dans un
+AJUSTE vous aide à suivre vos routines et vos indicateurs de bien-être dans un
 espace privé, directement sur votre iPhone.
 
 ORGANISEZ VOTRE QUOTIDIEN
@@ -54,25 +54,25 @@ conçus pour rester lisibles et accessibles.
 
 EXPLOREZ DES ASSOCIATIONS
 
-BioTrack compare vos séries avec plusieurs méthodes statistiques, des intervalles
+AJUSTE compare vos séries avec plusieurs méthodes statistiques, des intervalles
 de confiance et une correction des comparaisons multiples. Les résultats sont
 présentés comme des hypothèses exploratoires : une association ne prouve jamais
 une relation de cause à effet.
 
 GARDEZ LE CONTRÔLE DE VOS DONNÉES
 
-Aucun compte BioTrack n’est nécessaire. Vos données restent sur l’appareil et ne
+Aucun compte AJUSTE n’est nécessaire. Vos données restent sur l’appareil et ne
 sont pas utilisées pour la publicité. Vous pouvez les exporter manuellement en
 CSV ou JSON, ou créer une sauvegarde locale chiffrée par phrase de passe.
 
 HEALTHKIT, SI VOUS LE SOUHAITEZ
 
-Avec votre autorisation, BioTrack peut lire localement le sommeil, les pas, le
+Avec votre autorisation, AJUSTE peut lire localement le sommeil, les pas, le
 poids, la fréquence cardiaque au repos et la variabilité de la fréquence
 cardiaque afin de préremplir certaines métriques. Cette connexion est facultative
-et BioTrack n’écrit aucune donnée dans Santé.
+et AJUSTE n’écrit aucune donnée dans Santé.
 
-BioTrack est un outil de suivi personnel et de bien-être. Il ne constitue pas un
+AJUSTE est un outil de suivi personnel et de bien-être. Il ne constitue pas un
 dispositif médical, ne fournit pas de diagnostic et ne remplace pas l’avis d’un
 professionnel de santé.
 
@@ -82,14 +82,14 @@ professionnel de santé.
 
 ## Nouveautés de la version
 
-Les statistiques BioTrack ont été entièrement repensées : associations plus
+Les statistiques AJUSTE ont été entièrement repensées : associations plus
 robustes, graphiques plus lisibles, filtres corrigés, légendes accessibles et
 meilleure protection des données locales. Cette version améliore aussi la
 conformité HealthKit et la stabilité générale.
 
 ## Notes pour App Review
 
-BioTrack ne nécessite aucun compte et ne possède aucun backend applicatif. Toutes
+AJUSTE ne nécessite aucun compte et ne possède aucun backend applicatif. Toutes
 les données de suivi restent localement sur l’appareil.
 
 Parcours conseillé :
@@ -120,7 +120,7 @@ déclare `ITSAppUsesNonExemptEncryption = NO`.
 
 - Données collectées par le développeur : `Aucune`
 - Suivi publicitaire : `Non`
-- Données liées à l’utilisateur sur un serveur BioTrack : `Aucune`
+- Données liées à l’utilisateur sur un serveur AJUSTE : `Aucune`
 - Données HealthKit : traitées uniquement sur l’appareil après consentement
 - Export : uniquement à l’initiative de l’utilisateur via la feuille de partage
 

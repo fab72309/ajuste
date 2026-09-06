@@ -16,5 +16,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "BioTrack-Android"
+rootProject.name = "AJUSTE-Android"
 include(":app")

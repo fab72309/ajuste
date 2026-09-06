@@ -16,26 +16,26 @@
 "status.not_available" = "Indisponible";
 "status.unknown" = "Inconnu";
 
-"launch.loading.title" = "BioTrack";
-"launch.loading.subtitle" = "Préparation de votre espace de suivi.";
+"launch.loading.title" = "AJUSTE";
+"launch.loading.subtitle" = "Préparation de votre laboratoire personnel.";
 
-"onboarding.brand" = "BIOTRACK";
+"onboarding.brand" = "AJUSTE";
 "onboarding.step.counter" = "Étape %d sur %d";
 "onboarding.action.later" = "Plus tard";
 "onboarding.action.open_settings" = "Ouvrir Réglages";
 "onboarding.action.continue" = "Continuer";
 
 "onboarding.welcome.title" = "Suivez l'essentiel, simplement.";
-"onboarding.welcome.subtitle" = "BioTrack réunit vos rappels, vos métriques et vos routines dans une app locale, claire et rapide à prendre en main.";
+"onboarding.welcome.subtitle" = "AJUSTE réunit vos rappels, vos métriques et vos routines dans une app locale, claire et rapide à prendre en main.";
 "onboarding.welcome.benefit.1" = "Checklist, rappels et suivi quotidien au même endroit.";
 "onboarding.welcome.benefit.2" = "Connexion facultative à Santé pour pré-remplir sommeil, pas, poids, FC au repos et HRV.";
 "onboarding.welcome.benefit.3" = "Vos données restent sur votre appareil, sauf export manuel de votre part.";
-"onboarding.welcome.primary" = "Accéder à BioTrack";
+"onboarding.welcome.primary" = "Accéder à AJUSTE";
 "onboarding.welcome.legal_intro" = "Avant de commencer, vous pouvez consulter nos informations légales et de support.";
 
 "onboarding.notifications.title" = "Notifications";
 "onboarding.notifications.subtitle" = "Activez les rappels quand cela vous est utile.";
-"onboarding.notifications.point.1" = "BioTrack utilise uniquement des notifications locales pour vos rappels personnels.";
+"onboarding.notifications.point.1" = "AJUSTE utilise uniquement des notifications locales pour vos rappels personnels.";
 "onboarding.notifications.point.2" = "Aucune notification marketing ou promotionnelle n'est envoyée.";
 "onboarding.notifications.point.3" = "Vous pourrez modifier ce choix à tout moment dans les Réglages iOS.";
 "onboarding.notifications.footnote" = "Les rappels sont planifiés localement sur votre appareil après votre accord explicite.";
@@ -44,27 +44,27 @@
 "onboarding.health.title" = "App Santé";
 "onboarding.health.subtitle" = "Connectez l'app Santé pour pré-remplir automatiquement certaines métriques.";
 "onboarding.health.point.1" = "Lecture possible de : sommeil, pas, poids, fréquence cardiaque au repos et HRV.";
-"onboarding.health.point.2" = "Ces données servent uniquement au pré-remplissage local dans BioTrack.";
+"onboarding.health.point.2" = "Ces données servent uniquement au pré-remplissage local dans AJUSTE.";
 "onboarding.health.point.3" = "L'accès peut être retiré à tout moment depuis Réglages iOS > Santé.";
-"onboarding.health.footnote" = "BioTrack fonctionne sans compte, sans backend BioTrack et sans usage publicitaire de vos données.";
+"onboarding.health.footnote" = "AJUSTE fonctionne sans compte, sans serveur dédié et sans usage publicitaire de vos données.";
 "onboarding.health.primary" = "Connecter";
 
 "legal.privacy.title" = "Confidentialité";
-"legal.privacy.summary.1" = "BioTrack stocke vos données de suivi localement sur votre appareil. Aucun compte utilisateur n'est requis et BioTrack n'envoie pas vos données à un serveur dédié.";
+"legal.privacy.summary.1" = "AJUSTE stocke vos données de suivi localement sur votre appareil. Aucun compte utilisateur n'est requis et AJUSTE n'envoie pas vos données à un serveur dédié.";
 "legal.privacy.summary.2" = "Si vous activez l'accès à Santé, seules les catégories autorisées par vous sont lues afin de pré-remplir certaines métriques dans l'app.";
-"legal.privacy.summary.3" = "BioTrack ne vend pas vos données. Les exports sont manuels, initiés par vous et enregistrés à l'emplacement que vous choisissez.";
+"legal.privacy.summary.3" = "AJUSTE ne vend pas vos données. Les exports sont manuels, initiés par vous et enregistrés à l'emplacement que vous choisissez.";
 "legal.privacy.open" = "Ouvrir la politique complète";
 
 "legal.support.title" = "Support";
-"legal.support.summary.1" = "Pour toute question sur l'app, la confidentialité ou un problème d'utilisation, vous pouvez contacter BioTrack par email.";
-"legal.support.summary.2" = "Le support public et le signalement des problèmes sont accessibles depuis le dépôt officiel BioTrack.";
+"legal.support.summary.1" = "Pour toute question sur l'app, la confidentialité ou un problème d'utilisation, vous pouvez contacter AJUSTE par email.";
+"legal.support.summary.2" = "Le support public et le signalement des problèmes sont accessibles depuis le dépôt officiel AJUSTE.";
 "legal.support.summary.3" = "Ne publiez jamais de données de santé ou de sauvegarde dans un ticket de support.";
 "legal.support.open" = "Ouvrir la page support";
 "legal.support.email" = "Ouvrir un ticket de support";
 
 "legal.terms.title" = "Conditions d'utilisation";
-"legal.terms.summary.1" = "L'utilisation de BioTrack est soumise au contrat de licence utilisateur final standard Apple.";
-"legal.terms.summary.2" = "BioTrack est un outil de suivi personnel et de bien-être. Ce n'est pas un dispositif médical et l'app ne diagnostique, ne traite, ne guérit ni ne prévient aucune maladie.";
+"legal.terms.summary.1" = "L'utilisation d'AJUSTE est soumise au contrat de licence utilisateur final standard Apple.";
+"legal.terms.summary.2" = "AJUSTE est un outil de suivi personnel et de bien-être. Ce n'est pas un dispositif médical et l'app ne diagnostique, ne traite, ne guérit ni ne prévient aucune maladie.";
 "legal.terms.summary.3" = "Les associations statistiques et recommandations sont exploratoires : elles ne démontrent pas de causalité et ne remplacent pas l'avis d'un professionnel de santé.";
 "legal.terms.summary.4" = "Demandez conseil à un professionnel de santé avant toute décision médicale ou prise de supplément, notamment en cas de traitement, grossesse, maladie ou symptôme.";
 "legal.terms.open" = "Ouvrir le CLUF standard Apple";

@@ -294,7 +294,7 @@ private struct LibraryCard: View {
             }
             Text("Fiche de suivi à personnaliser")
                 .font(.footnote.weight(.semibold))
-            Text("Aucune dose ni bénéfice n’est proposé par BioTrack.")
+            Text("Aucune dose ni bénéfice n’est proposé par AJUSTE.")
                 .font(.caption)
                 .foregroundColor(.secondary)
             HStack {

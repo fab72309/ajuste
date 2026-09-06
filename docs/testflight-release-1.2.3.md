@@ -1,4 +1,4 @@
-# BioTrack 1.2.3 — notes de version
+# AJUSTE 1.2.3 — notes de version
 
 ## Texte App Store Connect / TestFlight
 
@@ -14,6 +14,6 @@ ni une preuve de causalité, ni un conseil médical.
 
 ## Texte court pour la vidéo YouTube
 
-BioTrack 1.2.3 clarifie la lecture des associations : les statistiques sont
+AJUSTE 1.2.3 clarifie la lecture des associations : les statistiques sont
 présentées en cartes, les décimales sont localisées et VoiceOver explique mieux
 le sens du coefficient de Pearson.

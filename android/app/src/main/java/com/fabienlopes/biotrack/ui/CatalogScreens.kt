@@ -2,37 +2,34 @@ package com.fabienlopes.biotrack.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -48,12 +45,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.fabienlopes.biotrack.R
 import com.fabienlopes.biotrack.data.BioTrackViewModel
-import com.fabienlopes.biotrack.data.Frequency
-import com.fabienlopes.biotrack.data.FrequencyKind
 import com.fabienlopes.biotrack.data.ProtocolItem
 import com.fabienlopes.biotrack.data.Supplement
 import com.fabienlopes.biotrack.domain.Planner
@@ -65,9 +62,11 @@ fun ProtocolsScreen(viewModel: BioTrackViewModel) {
     var query by remember { mutableStateOf("") }
     var activeOnly by remember { mutableStateOf(true) }
     var category by remember { mutableStateOf<String?>(null) }
-    var editor by remember { mutableStateOf<ProtocolItem?>(null) }
-    var showEditor by remember { mutableStateOf(false) }
+    var showCatalog by remember { mutableStateOf(false) }
+    var editorSeed by remember { mutableStateOf<ProtocolItem?>(null) }
+    var editingExisting by remember { mutableStateOf(false) }
     var deleteCandidate by remember { mutableStateOf<ProtocolItem?>(null) }
+    var logItem by remember { mutableStateOf<ProtocolItem?>(null) }
     var runningTimer by remember { mutableStateOf<String?>(null) }
     var secondsLeft by remember { mutableIntStateOf(0) }
 
@@ -82,39 +81,40 @@ fun ProtocolsScreen(viewModel: BioTrackViewModel) {
     val categories = snapshot.protocols.mapNotNull { it.category }.distinct().sorted()
     val filtered = snapshot.protocols.filter { item ->
         (!activeOnly || item.active) && (category == null || item.category == category) &&
-            (query.isBlank() || item.name.contains(query, ignoreCase = true) || item.detail.orEmpty().contains(query, ignoreCase = true))
+            (query.isBlank() || item.name.contains(query, ignoreCase = true) ||
+                item.detail.orEmpty().contains(query, ignoreCase = true) ||
+                item.goal.orEmpty().contains(query, ignoreCase = true))
     }.sortedBy { it.name.lowercase() }
 
     Scaffold(
-        floatingActionButton = { FloatingActionButton(onClick = { editor = null; showEditor = true }) { Icon(Icons.Default.Add, contentDescription = "Ajouter") } }
+        floatingActionButton = {
+            FloatingActionButton(onClick = { showCatalog = true }) {
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add))
+            }
+        }
     ) { padding ->
         LazyColumn(
             modifier = Modifier.padding(padding),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 14.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             item {
-                Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text("Protocoles", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                            Text("Routines, objectifs et temps dédié", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                        Icon(Icons.Default.Flag, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp))
-                    }
-                    Spacer(Modifier.height(12.dp))
-                    OutlinedTextField(query, { query = it }, leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) }, label = { Text("Rechercher") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                    Spacer(Modifier.height(8.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        FilterChip(selected = activeOnly, onClick = { activeOnly = !activeOnly }, label = { Text("Actifs") })
-                        FilterChip(selected = category == null, onClick = { category = null }, label = { Text("Toutes") })
-                        categories.forEach { itemCategory ->
-                            FilterChip(selected = category == itemCategory, onClick = { category = itemCategory }, label = { Text(itemCategory) })
-                        }
-                    }
-                }
+                CatalogListHeader(
+                    title = stringResource(R.string.protocols_title),
+                    subtitle = stringResource(R.string.protocols_subtitle),
+                    query = query,
+                    onQueryChange = { query = it },
+                    activeOnly = activeOnly,
+                    onActiveOnlyChange = { activeOnly = it },
+                    category = category,
+                    categories = categories,
+                    onCategoryChange = { category = it },
+                    icon = { Icon(Icons.Default.Flag, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp)) }
+                )
             }
-            if (filtered.isEmpty()) item { BioCard { Text("Aucun protocole ne correspond à vos filtres.", color = MaterialTheme.colorScheme.onSurfaceVariant) } }
+            if (filtered.isEmpty()) {
+                item { BioCard { Text(stringResource(R.string.no_protocol_results), color = MaterialTheme.colorScheme.onSurfaceVariant) } }
+            }
             items(filtered, key = { it.id }) { protocol ->
                 ProtocolRow(
                     item = protocol,
@@ -123,8 +123,9 @@ fun ProtocolsScreen(viewModel: BioTrackViewModel) {
                     secondsLeft = if (runningTimer == protocol.id) secondsLeft else 0,
                     onToggleDone = { viewModel.toggleProtocol(protocol.id) },
                     onToggleActive = { viewModel.toggleProtocolActive(protocol.id) },
-                    onEdit = { editor = protocol; showEditor = true },
+                    onEdit = { editorSeed = protocol; editingExisting = true },
                     onDelete = { deleteCandidate = protocol },
+                    onHistory = { logItem = protocol },
                     onTimer = {
                         if (runningTimer == protocol.id) {
                             runningTimer = null
@@ -139,19 +140,44 @@ fun ProtocolsScreen(viewModel: BioTrackViewModel) {
         }
     }
 
-    if (showEditor) {
-        ProtocolEditorDialog(existing = editor, onDismiss = { showEditor = false }) { item ->
-            if (editor == null) viewModel.addProtocol(item) else viewModel.updateProtocol(item)
-            showEditor = false
-        }
+    if (showCatalog) {
+        ProtocolCatalogDialog(
+            customTemplates = snapshot.customProtocolTemplates,
+            onDismiss = { showCatalog = false },
+            onBlank = { showCatalog = false; editingExisting = false; editorSeed = ProtocolItem(name = "") },
+            onSelect = { showCatalog = false; editingExisting = false; editorSeed = it }
+        )
+    }
+    editorSeed?.let { seed ->
+        ProtocolEditorDialog(
+            initial = seed,
+            isEditing = editingExisting,
+            onDismiss = { editorSeed = null },
+            onSave = { item, saveTemplate ->
+                if (editingExisting) viewModel.updateProtocol(item) else viewModel.addProtocol(item)
+                if (saveTemplate) viewModel.saveProtocolTemplate(item)
+                editorSeed = null
+            }
+        )
+    }
+    logItem?.let { item ->
+        ProtocolLogsDialog(
+            protocol = item,
+            completions = snapshot.protocolCompletions.filter { it.protocolId == item.id },
+            onDismiss = { logItem = null },
+            onUpsert = viewModel::upsertProtocolCompletion,
+            onDelete = viewModel::deleteProtocolCompletion
+        )
     }
     deleteCandidate?.let { item ->
         AlertDialog(
             onDismissRequest = { deleteCandidate = null },
-            title = { Text("Supprimer le protocole ?") },
-            text = { Text("Supprimer « ${item.name} » ? Cette action est irréversible.") },
-            confirmButton = { Button(onClick = { viewModel.deleteProtocol(item.id); deleteCandidate = null }) { Text("Supprimer") } },
-            dismissButton = { TextButton(onClick = { deleteCandidate = null }) { Text("Annuler") } }
+            title = { Text(stringResource(R.string.delete_protocol_title)) },
+            text = { Text(stringResource(R.string.delete_protocol_message, item.name)) },
+            confirmButton = {
+                Button(onClick = { viewModel.deleteProtocol(item.id); deleteCandidate = null }) { Text(stringResource(R.string.delete)) }
+            },
+            dismissButton = { TextButton(onClick = { deleteCandidate = null }) { Text(stringResource(R.string.cancel)) } }
         )
     }
 }
@@ -166,6 +192,7 @@ private fun ProtocolRow(
     onToggleActive: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
+    onHistory: () -> Unit,
     onTimer: () -> Unit
 ) {
     BioCard {
@@ -173,68 +200,31 @@ private fun ProtocolRow(
             Checkbox(checked = isDone, onCheckedChange = { onToggleDone() })
             Column(modifier = Modifier.weight(1f).padding(top = 10.dp)) {
                 Text(item.name, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(item.detail ?: Planner.frequencyLabel(item.frequency), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(item.detail ?: localizedFrequencyLabel(item.frequency), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 item.category?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary) }
             }
-            IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, contentDescription = "Modifier") }
-            IconButton(onClick = onDelete) { Icon(Icons.Default.Delete, contentDescription = "Supprimer", tint = MaterialTheme.colorScheme.error) }
+            IconButton(onClick = onHistory) { Icon(Icons.Default.History, contentDescription = stringResource(R.string.open_history)) }
+            IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit)) }
+            IconButton(onClick = onDelete) { Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete), tint = MaterialTheme.colorScheme.error) }
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(if (item.active) "Activé" else "Inactif", style = MaterialTheme.typography.labelMedium, color = if (item.active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
-            IconButton(onClick = onTimer) { Icon(if (timerRunning) Icons.Default.Stop else Icons.Default.Timer, contentDescription = if (timerRunning) "Arrêter" else "Démarrer le minuteur", tint = MaterialTheme.colorScheme.primary) }
+            Text(
+                stringResource(if (item.active) R.string.active else R.string.inactive),
+                style = MaterialTheme.typography.labelMedium,
+                color = if (item.active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f)
+            )
+            IconButton(onClick = onTimer) {
+                Icon(
+                    if (timerRunning) Icons.Default.Stop else Icons.Default.Timer,
+                    contentDescription = stringResource(if (timerRunning) R.string.stop_timer else R.string.start_timer),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
             if (timerRunning) Text("%02d:%02d".format(secondsLeft / 60, secondsLeft % 60), fontWeight = FontWeight.Bold, modifier = Modifier.padding(end = 8.dp))
             Switch(checked = item.active, onCheckedChange = { onToggleActive() })
         }
     }
-}
-
-@Composable
-private fun ProtocolEditorDialog(existing: ProtocolItem?, onDismiss: () -> Unit, onSave: (ProtocolItem) -> Unit) {
-    var name by remember { mutableStateOf(existing?.name.orEmpty()) }
-    var detail by remember { mutableStateOf(existing?.detail.orEmpty()) }
-    var category by remember { mutableStateOf(existing?.category.orEmpty()) }
-    var minutes by remember { mutableStateOf((existing?.targetMinutes ?: 10).toString()) }
-    var hour by remember { mutableStateOf((existing?.preferredHour ?: 8).toString()) }
-    var minute by remember { mutableStateOf((existing?.preferredMinute ?: 0).toString()) }
-    var weekly by remember { mutableStateOf(existing?.frequency?.kind == FrequencyKind.WEEKLY) }
-    var days by remember { mutableStateOf(existing?.frequency?.days?.joinToString(",") ?: "1,2,3,4,5") }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(if (existing == null) "Nouveau protocole" else "Modifier le protocole") },
-        text = {
-            Column(modifier = Modifier.padding(top = 4.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
-                OutlinedTextField(name, { name = it }, label = { Text("Nom") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                OutlinedTextField(detail, { detail = it }, label = { Text("Détail") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                OutlinedTextField(category, { category = it }, label = { Text("Catégorie") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(minutes, { minutes = it.filter(Char::isDigit).take(3) }, label = { Text("Minutes") }, modifier = Modifier.weight(1f), singleLine = true)
-                    OutlinedTextField(hour, { hour = it.filter(Char::isDigit).take(2) }, label = { Text("Heure") }, modifier = Modifier.weight(1f), singleLine = true)
-                    OutlinedTextField(minute, { minute = it.filter(Char::isDigit).take(2) }, label = { Text("Min.") }, modifier = Modifier.weight(1f), singleLine = true)
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(checked = weekly, onCheckedChange = { weekly = it })
-                    Text("Planifier certains jours")
-                }
-                if (weekly) OutlinedTextField(days, { days = it }, label = { Text("Jours 1=Lun … 7=Dim") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-            }
-        },
-        confirmButton = { Button(onClick = {
-            onSave(ProtocolItem(
-                id = existing?.id ?: java.util.UUID.randomUUID().toString(),
-                name = name,
-                detail = detail.takeIf { it.isNotBlank() },
-                category = category.takeIf { it.isNotBlank() },
-                targetMinutes = minutes.toIntOrNull()?.coerceAtLeast(1),
-                preferredHour = hour.toIntOrNull()?.coerceIn(0, 23),
-                preferredMinute = minute.toIntOrNull()?.coerceIn(0, 59),
-                frequency = if (weekly) Frequency.weekly(days.split(",").mapNotNull { it.trim().toIntOrNull()?.coerceIn(1, 7) }) else Frequency.daily(),
-                active = existing?.active ?: true,
-                startDate = existing?.startDate ?: System.currentTimeMillis(),
-                activationSpans = existing?.activationSpans ?: emptyList()
-            ))
-        }, enabled = name.isNotBlank()) { Text("Enregistrer") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Annuler") } }
-    )
 }
 
 @Composable
@@ -243,108 +233,178 @@ fun SupplementsScreen(viewModel: BioTrackViewModel) {
     var query by remember { mutableStateOf("") }
     var activeOnly by remember { mutableStateOf(true) }
     var category by remember { mutableStateOf<String?>(null) }
-    var editor by remember { mutableStateOf<Supplement?>(null) }
-    var showEditor by remember { mutableStateOf(false) }
+    var showCatalog by remember { mutableStateOf(false) }
+    var editorSeed by remember { mutableStateOf<Supplement?>(null) }
+    var editingExisting by remember { mutableStateOf(false) }
     var deleteCandidate by remember { mutableStateOf<Supplement?>(null) }
+    var logItem by remember { mutableStateOf<Supplement?>(null) }
     val categories = snapshot.supplements.mapNotNull { it.category }.distinct().sorted()
     val filtered = snapshot.supplements.filter { item ->
         (!activeOnly || item.active) && (category == null || item.category == category) &&
             (query.isBlank() || item.name.contains(query, ignoreCase = true) || item.brand.orEmpty().contains(query, ignoreCase = true) || item.dose.orEmpty().contains(query, ignoreCase = true))
     }.sortedBy { it.name.lowercase() }
 
-    Scaffold(floatingActionButton = { FloatingActionButton(onClick = { editor = null; showEditor = true }) { Icon(Icons.Default.Add, contentDescription = "Ajouter") } }) { padding ->
-        LazyColumn(modifier = Modifier.padding(padding), contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            item {
-                Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text("Suppléments", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                            Text("Suivi personnel et observance", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                        Icon(Icons.Default.Favorite, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp))
-                    }
-                    Spacer(Modifier.height(12.dp))
-                    OutlinedTextField(query, { query = it }, leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) }, label = { Text("Rechercher") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                    Spacer(Modifier.height(8.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        FilterChip(selected = activeOnly, onClick = { activeOnly = !activeOnly }, label = { Text("Actifs") })
-                        FilterChip(selected = category == null, onClick = { category = null }, label = { Text("Toutes") })
-                        categories.forEach { itemCategory -> FilterChip(selected = category == itemCategory, onClick = { category = itemCategory }, label = { Text(itemCategory) }) }
-                    }
-                }
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(onClick = { showCatalog = true }) {
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add))
             }
-            if (filtered.isEmpty()) item { BioCard { Text("Aucun supplément ne correspond à vos filtres.", color = MaterialTheme.colorScheme.onSurfaceVariant) } }
+        }
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier.padding(padding),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            item {
+                CatalogListHeader(
+                    title = stringResource(R.string.supplements_title),
+                    subtitle = stringResource(R.string.supplements_subtitle),
+                    query = query,
+                    onQueryChange = { query = it },
+                    activeOnly = activeOnly,
+                    onActiveOnlyChange = { activeOnly = it },
+                    category = category,
+                    categories = categories,
+                    onCategoryChange = { category = it },
+                    icon = { Icon(Icons.Default.Favorite, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp)) }
+                )
+            }
+            if (filtered.isEmpty()) {
+                item { BioCard { Text(stringResource(R.string.no_supplement_results), color = MaterialTheme.colorScheme.onSurfaceVariant) } }
+            }
             items(filtered, key = { it.id }) { supplement ->
                 SupplementRow(
                     item = supplement,
                     isTaken = Planner.isSupplementTakenToday(supplement.id, snapshot),
                     onToggleTaken = { viewModel.toggleSupplement(supplement.id) },
                     onToggleActive = { viewModel.toggleSupplementActive(supplement.id) },
-                    onEdit = { editor = supplement; showEditor = true },
-                    onDelete = { deleteCandidate = supplement }
+                    onEdit = { editorSeed = supplement; editingExisting = true },
+                    onDelete = { deleteCandidate = supplement },
+                    onHistory = { logItem = supplement }
                 )
             }
         }
     }
 
-    if (showEditor) {
-        SupplementEditorDialog(existing = editor, onDismiss = { showEditor = false }) { item ->
-            if (editor == null) viewModel.addSupplement(item) else viewModel.updateSupplement(item)
-            showEditor = false
-        }
+    if (showCatalog) {
+        SupplementCatalogDialog(
+            customTemplates = snapshot.customSupplementTemplates,
+            onDismiss = { showCatalog = false },
+            onBlank = { showCatalog = false; editingExisting = false; editorSeed = Supplement(name = "") },
+            onSelect = { showCatalog = false; editingExisting = false; editorSeed = it }
+        )
+    }
+    editorSeed?.let { seed ->
+        SupplementEditorDialog(
+            initial = seed,
+            isEditing = editingExisting,
+            onDismiss = { editorSeed = null },
+            onSave = { item, saveTemplate ->
+                if (editingExisting) viewModel.updateSupplement(item) else viewModel.addSupplement(item)
+                if (saveTemplate) viewModel.saveSupplementTemplate(item)
+                editorSeed = null
+            }
+        )
+    }
+    logItem?.let { item ->
+        SupplementLogsDialog(
+            supplement = item,
+            intakes = snapshot.supplementIntakes.filter { it.supplementId == item.id },
+            onDismiss = { logItem = null },
+            onUpsert = viewModel::upsertSupplementIntake,
+            onDelete = viewModel::deleteSupplementIntake
+        )
     }
     deleteCandidate?.let { item ->
-        AlertDialog(onDismissRequest = { deleteCandidate = null }, title = { Text("Supprimer le supplément ?") }, text = { Text("Supprimer « ${item.name} » ? Cette action est irréversible.") }, confirmButton = { Button(onClick = { viewModel.deleteSupplement(item.id); deleteCandidate = null }) { Text("Supprimer") } }, dismissButton = { TextButton(onClick = { deleteCandidate = null }) { Text("Annuler") } })
+        AlertDialog(
+            onDismissRequest = { deleteCandidate = null },
+            title = { Text(stringResource(R.string.delete_supplement_title)) },
+            text = { Text(stringResource(R.string.delete_supplement_message, item.name)) },
+            confirmButton = {
+                Button(onClick = { viewModel.deleteSupplement(item.id); deleteCandidate = null }) { Text(stringResource(R.string.delete)) }
+            },
+            dismissButton = { TextButton(onClick = { deleteCandidate = null }) { Text(stringResource(R.string.cancel)) } }
+        )
     }
 }
 
 @Composable
-private fun SupplementRow(item: Supplement, isTaken: Boolean, onToggleTaken: () -> Unit, onToggleActive: () -> Unit, onEdit: () -> Unit, onDelete: () -> Unit) {
+private fun SupplementRow(
+    item: Supplement,
+    isTaken: Boolean,
+    onToggleTaken: () -> Unit,
+    onToggleActive: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
+    onHistory: () -> Unit
+) {
     BioCard {
         Row(verticalAlignment = Alignment.Top) {
             Checkbox(checked = isTaken, onCheckedChange = { onToggleTaken() })
             Column(modifier = Modifier.weight(1f).padding(top = 10.dp)) {
                 Text(item.name, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 val metadata = listOfNotNull(item.dose, item.brand, item.timeContext).joinToString(" · ")
-                Text(metadata.ifBlank { Planner.frequencyLabel(item.frequency) }, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(metadata.ifBlank { localizedFrequencyLabel(item.frequency) }, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 item.category?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary) }
             }
-            IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, contentDescription = "Modifier") }
-            IconButton(onClick = onDelete) { Icon(Icons.Default.Delete, contentDescription = "Supprimer", tint = MaterialTheme.colorScheme.error) }
+            IconButton(onClick = onHistory) { Icon(Icons.Default.History, contentDescription = stringResource(R.string.open_history)) }
+            IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit)) }
+            IconButton(onClick = onDelete) { Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete), tint = MaterialTheme.colorScheme.error) }
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(if (item.active) "Activé" else "Inactif", style = MaterialTheme.typography.labelMedium, color = if (item.active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
+            Text(
+                stringResource(if (item.active) R.string.active else R.string.inactive),
+                style = MaterialTheme.typography.labelMedium,
+                color = if (item.active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f)
+            )
             Switch(checked = item.active, onCheckedChange = { onToggleActive() })
         }
     }
 }
 
 @Composable
-private fun SupplementEditorDialog(existing: Supplement?, onDismiss: () -> Unit, onSave: (Supplement) -> Unit) {
-    var name by remember { mutableStateOf(existing?.name.orEmpty()) }
-    var brand by remember { mutableStateOf(existing?.brand.orEmpty()) }
-    var dose by remember { mutableStateOf(existing?.dose.orEmpty()) }
-    var category by remember { mutableStateOf(existing?.category.orEmpty()) }
-    var context by remember { mutableStateOf(existing?.timeContext.orEmpty()) }
-    var hour by remember { mutableStateOf((existing?.timeOfDay?.div(60) ?: 8).toString()) }
-    var minute by remember { mutableStateOf((existing?.timeOfDay?.rem(60) ?: 0).toString()) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(if (existing == null) "Nouveau supplément" else "Modifier le supplément") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
-                OutlinedTextField(name, { name = it }, label = { Text("Nom") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                OutlinedTextField(brand, { brand = it }, label = { Text("Marque (facultatif)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                OutlinedTextField(dose, { dose = it }, label = { Text("Dose / repère (facultatif)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                OutlinedTextField(category, { category = it }, label = { Text("Catégorie") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                OutlinedTextField(context, { context = it }, label = { Text("Contexte horaire") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(hour, { hour = it.filter(Char::isDigit).take(2) }, label = { Text("Heure") }, modifier = Modifier.weight(1f), singleLine = true)
-                    OutlinedTextField(minute, { minute = it.filter(Char::isDigit).take(2) }, label = { Text("Min.") }, modifier = Modifier.weight(1f), singleLine = true)
-                }
+private fun CatalogListHeader(
+    title: String,
+    subtitle: String,
+    query: String,
+    onQueryChange: (String) -> Unit,
+    activeOnly: Boolean,
+    onActiveOnlyChange: (Boolean) -> Unit,
+    category: String?,
+    categories: List<String>,
+    onCategoryChange: (String?) -> Unit,
+    icon: @Composable () -> Unit
+) {
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-        },
-        confirmButton = { Button(onClick = { onSave(Supplement(id = existing?.id ?: java.util.UUID.randomUUID().toString(), name = name, brand = brand.takeIf { it.isNotBlank() }, dose = dose.takeIf { it.isNotBlank() }, category = category.takeIf { it.isNotBlank() }, timeContext = context.takeIf { it.isNotBlank() }, timeOfDay = (hour.toIntOrNull()?.coerceIn(0, 23) ?: 8) * 60 + (minute.toIntOrNull()?.coerceIn(0, 59) ?: 0), active = existing?.active ?: true, activationSpans = existing?.activationSpans ?: emptyList())) }, enabled = name.isNotBlank()) { Text("Enregistrer") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Annuler") } }
-    )
+            icon()
+        }
+        Spacer(Modifier.height(12.dp))
+        OutlinedTextField(
+            value = query,
+            onValueChange = onQueryChange,
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+            label = { Text(stringResource(R.string.search)) },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+        Spacer(Modifier.height(8.dp))
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            item {
+                FilterChip(selected = activeOnly, onClick = { onActiveOnlyChange(!activeOnly) }, label = { Text(stringResource(R.string.active_filter)) })
+            }
+            item {
+                FilterChip(selected = category == null, onClick = { onCategoryChange(null) }, label = { Text(stringResource(R.string.all_filter)) })
+            }
+            items(categories) { itemCategory ->
+                FilterChip(selected = category == itemCategory, onClick = { onCategoryChange(itemCategory) }, label = { Text(itemCategory) })
+            }
+        }
+    }
 }

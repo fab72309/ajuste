@@ -1,4 +1,4 @@
-# BioTrack 1.1.0 (4) — TestFlight
+# AJUSTE 1.1.0 (4) — TestFlight
 
 ## Notes de test
 
@@ -25,6 +25,6 @@ Cette version renforce les statistiques et la lisibilité des graphiques :
 
 ## Positionnement
 
-BioTrack est un outil de suivi personnel et de bien-être. Les associations
+AJUSTE est un outil de suivi personnel et de bien-être. Les associations
 statistiques servent à formuler des hypothèses et ne prouvent pas une causalité.
 L’application n’est pas un dispositif médical.

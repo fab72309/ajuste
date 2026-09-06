@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 240" role="img" aria-labelledby="title desc">
+  <title id="title">AJUSTE</title>
+  <desc id="desc">Symbole de trajectoires ajustées et mot-symbole AJUSTE.</desc>
+  <g transform="translate(24 -136) scale(.48)">
+    <path d="M74 196h128c36 0 47-64 91-64h115" fill="none" stroke="#172B3A" stroke-width="38" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M74 316h128c36 0 47-64 91-64h76" fill="none" stroke="#FF6B57" stroke-width="38" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="423" cy="252" r="21" fill="#FF6B57"/>
+  </g>
+  <text x="270" y="151" fill="#172B3A" font-family="Space Grotesk, Avenir Next, Arial, sans-serif" font-size="92" font-weight="700" letter-spacing="14">AJUSTE</text>
+</svg>

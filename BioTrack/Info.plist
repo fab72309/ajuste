@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>BioTrack</string>
+	<string>AJUSTE</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -34,9 +34,9 @@
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSHealthShareUsageDescription</key>
-	<string>BioTrack lit vos données Santé (sommeil, pas, poids, fréquence cardiaque au repos, HRV) pour pré-remplir vos métriques.</string>
+	<string>AJUSTE lit les données Santé que vous choisissez (sommeil, pas, poids, fréquence cardiaque au repos, HRV) afin de pré-remplir vos métriques localement.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>BioTrack ne modifie aucune donnée Santé. Cette déclaration est requise par HealthKit ; l’app utilise Santé uniquement en lecture, avec votre accord, pour pré-remplir localement vos métriques.</string>
+	<string>AJUSTE ne modifie aucune donnée Santé. Cette déclaration est requise par HealthKit ; l’app utilise Santé uniquement en lecture, avec votre accord.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>NSSupportsLiveActivitiesFrequentUpdates</key>

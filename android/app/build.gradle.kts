@@ -23,7 +23,7 @@ android {
         applicationId = "com.fabienlopes.biotrack"
         minSdk = 28
         targetSdk = 36
-        versionCode = 9
+        versionCode = 10
         versionName = "1.2.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -95,4 +95,8 @@ dependencies {
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+
+    androidTestImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test:core:1.7.0")
+    androidTestImplementation("androidx.test:runner:1.7.0")
 }

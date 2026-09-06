@@ -44,6 +44,15 @@ data class ExperimentSummary(
     val delta: Double?
 )
 
+enum class AdherenceInsightKind { LOW, HIGH, HARDEST_DAY }
+
+data class AdherenceInsight(
+    val kind: AdherenceInsightKind,
+    val days: Int,
+    val percent: Int,
+    val weekday: Int? = null
+)
+
 object Statistics {
     fun estimate(x: List<Double>, y: List<Double>): CorrelationEstimate? {
         if (x.size != y.size || x.size < 4 || x.any { !it.isFinite() } || y.any { !it.isFinite() }) return null
@@ -175,7 +184,7 @@ object Statistics {
         }.sortedByDescending { insightScore(it) }
     }
 
-    fun adherenceInsights(snapshot: AppSnapshot, days: Int = 14, now: Long = System.currentTimeMillis()): List<String> {
+    fun adherenceInsights(snapshot: AppSnapshot, days: Int = 14, now: Long = System.currentTimeMillis()): List<AdherenceInsight> {
         var total = 0
         var done = 0
         val weekdayCounts = mutableMapOf<Int, Pair<Int, Int>>()
@@ -189,15 +198,14 @@ object Statistics {
             weekdayCounts[day.dayOfWeek.value] = (previous.first + plan.done) to (previous.second + plan.total)
         }
         val rate = if (total == 0) 0.0 else done.toDouble() / total
-        val lines = mutableListOf<String>()
-        if (rate < 0.60) lines += "Votre adhérence sur $days jours est faible (${(rate * 100).toInt()}%). Réduisez la charge quotidienne."
-        if (rate >= 0.85) lines += "Très bonne constance (${(rate * 100).toInt()}%). Conservez ce rythme ou ajustez vos objectifs prudemment."
+        val insights = mutableListOf<AdherenceInsight>()
+        if (rate < 0.60) insights += AdherenceInsight(AdherenceInsightKind.LOW, days, (rate * 100).toInt())
+        if (rate >= 0.85) insights += AdherenceInsight(AdherenceInsightKind.HIGH, days, (rate * 100).toInt())
         weekdayCounts.minByOrNull { (_, values) -> if (values.second == 0) 0.0 else values.first.toDouble() / values.second }?.let { (weekday, values) ->
-            val labels = listOf("", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim")
             val ratio = if (values.second == 0) 0 else values.first * 100 / values.second
-            lines += "Jour le plus difficile: ${labels.getOrElse(weekday) { "-" }} ($ratio%)."
+            insights += AdherenceInsight(AdherenceInsightKind.HARDEST_DAY, days, ratio, weekday)
         }
-        return lines
+        return insights
     }
 
     fun recommendations(snapshot: AppSnapshot, now: Long = System.currentTimeMillis(), limit: Int = 8): List<RecommendationItem> {
@@ -224,8 +232,13 @@ object Statistics {
         snapshot.correlationInsights.firstOrNull { it.evidence == CorrelationEvidence.MODERATE || it.evidence == CorrelationEvidence.STRONG }?.let {
             if (abs(it.pearson) >= 0.45) items += RecommendationItem(title = "Insight de corrélation", message = it.summary, priority = RecommendationPriority.MEDIUM, reason = "correlation_signal")
         }
-        adherenceInsights(snapshot, now = now).take(2).forEach { line ->
-            items += RecommendationItem(title = "Adhérence", message = line, priority = RecommendationPriority.MEDIUM, reason = "adherence_insight")
+        adherenceInsights(snapshot, now = now).take(2).forEach { insight ->
+            val message = when (insight.kind) {
+                AdherenceInsightKind.LOW -> "Votre adhérence sur ${insight.days} jours est faible (${insight.percent}%). Réduisez la charge quotidienne."
+                AdherenceInsightKind.HIGH -> "Très bonne constance (${insight.percent}%). Conservez ce rythme ou ajustez vos objectifs prudemment."
+                AdherenceInsightKind.HARDEST_DAY -> "Jour le plus difficile: ${insight.weekday ?: "-"} (${insight.percent}%)."
+            }
+            items += RecommendationItem(title = "Adhérence", message = message, priority = RecommendationPriority.MEDIUM, reason = "adherence_${insight.kind.name.lowercase()}")
         }
         return items.sortedByDescending { when (it.priority) { RecommendationPriority.HIGH -> 3; RecommendationPriority.MEDIUM -> 2; RecommendationPriority.LOW -> 1 } }.take(limit)
     }

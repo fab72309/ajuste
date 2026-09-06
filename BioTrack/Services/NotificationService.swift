@@ -160,7 +160,7 @@ final class NotificationService {
     func handleNotificationAction(identifier: String, userInfo: [AnyHashable: Any]) {
         guard let action = ReminderNotificationAction(rawValue: identifier) else { return }
         let baseId = (userInfo[reminderBaseIdKey] as? String) ?? ""
-        let title = (userInfo[reminderTitleKey] as? String) ?? "Rappel BioTrack"
+        let title = (userInfo[reminderTitleKey] as? String) ?? "Rappel AJUSTE"
         guard !baseId.isEmpty else { return }
 
         switch action {

@@ -106,6 +106,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -113,28 +115,32 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.health.connect.client.PermissionController
+import androidx.annotation.StringRes
+import com.fabienlopes.biotrack.R
 import com.fabienlopes.biotrack.data.AppSnapshot
 import com.fabienlopes.biotrack.data.BioTrackViewModel
 import com.fabienlopes.biotrack.data.CheckInPeriod
 import com.fabienlopes.biotrack.data.DailyCheckIn
+import com.fabienlopes.biotrack.data.Metric
 import com.fabienlopes.biotrack.data.MetricKind
 import com.fabienlopes.biotrack.data.Reminder
 import com.fabienlopes.biotrack.data.RoutineProfileKind
 import com.fabienlopes.biotrack.domain.Planner
+import com.fabienlopes.biotrack.domain.PlannedItem
+import com.fabienlopes.biotrack.domain.PlannedItemKind
 import com.fabienlopes.biotrack.integration.HealthConnectManager
-import com.fabienlopes.biotrack.notifications.ReminderScheduler
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
 
-enum class AppTab(val label: String) {
-    HOME("Checklist"),
-    TRACK("Suivi"),
-    STATS("Stats"),
-    PROTOCOLS("Protocoles"),
-    SUPPLEMENTS("Suppléments")
+enum class AppTab(@param:StringRes val labelRes: Int) {
+    HOME(R.string.tab_home),
+    TRACK(R.string.tab_track),
+    STATS(R.string.tab_stats),
+    PROTOCOLS(R.string.protocols_title),
+    SUPPLEMENTS(R.string.supplements_title)
 }
 
 @Composable
@@ -177,6 +183,7 @@ private fun MainScaffold(
         bottomBar = {
             NavigationBar(modifier = Modifier.navigationBarsPadding()) {
                 AppTab.entries.forEach { tab ->
+                    val tabLabel = stringResource(tab.labelRes)
                     NavigationBarItem(
                         selected = selectedTab == tab,
                         onClick = { selectedTab = tab },
@@ -189,10 +196,10 @@ private fun MainScaffold(
                                     AppTab.PROTOCOLS -> Icons.Default.Flag
                                     AppTab.SUPPLEMENTS -> Icons.Default.Favorite
                                 },
-                                contentDescription = tab.label
+                                contentDescription = tabLabel
                             )
                         },
-                        label = { Text(tab.label, maxLines = 1, fontSize = 10.sp) }
+                        label = { Text(tabLabel, maxLines = 1, fontSize = 10.sp) }
                     )
                 }
             }
@@ -225,9 +232,9 @@ private fun OnboardingScreen(viewModel: BioTrackViewModel) {
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("BIOTRACK", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = primary)
+                Text(stringResource(R.string.app_name), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = primary, letterSpacing = 2.sp)
                 Spacer(Modifier.weight(1f))
-                Text("${step + 1}/3", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(R.string.onboarding_step, step + 1), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Spacer(Modifier.height(12.dp))
             LinearProgressIndicator(progress = { (step + 1) / 3f }, modifier = Modifier.fillMaxWidth().clip(CircleShape))
@@ -249,9 +256,9 @@ private fun OnboardingScreen(viewModel: BioTrackViewModel) {
                 Column {
                     Text(
                         when (current) {
-                            0 -> "Votre suivi personnel, privé."
-                            1 -> "Ne ratez pas vos routines."
-                            else -> "Vos données santé, sous votre contrôle."
+                            0 -> stringResource(R.string.onboarding_private_title)
+                            1 -> stringResource(R.string.onboarding_routines_title)
+                            else -> stringResource(R.string.onboarding_health_title)
                         },
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
@@ -259,18 +266,18 @@ private fun OnboardingScreen(viewModel: BioTrackViewModel) {
                     Spacer(Modifier.height(12.dp))
                     Text(
                         when (current) {
-                            0 -> "BioTrack vous aide à observer vos routines, métriques, check-ins et protocoles sans compte ni serveur BioTrack."
-                            1 -> "Les notifications sont locales. Vous pouvez les activer maintenant ou plus tard dans les paramètres."
-                            else -> stringResource(com.fabienlopes.biotrack.R.string.health_permissions_rationale)
+                            0 -> stringResource(R.string.onboarding_private_body)
+                            1 -> stringResource(R.string.onboarding_notifications_body)
+                            else -> stringResource(R.string.health_permissions_rationale)
                         },
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(Modifier.height(22.dp))
                     listOf(
-                        "Données conservées sur l’appareil",
-                        "Résultats exploratoires, sans diagnostic",
-                        "Export JSON et sauvegarde chiffrée"
+                        stringResource(R.string.onboarding_bullet_local),
+                        stringResource(R.string.onboarding_bullet_exploratory),
+                        stringResource(R.string.onboarding_bullet_export)
                     ).forEach { item ->
                         Row(modifier = Modifier.padding(vertical = 7.dp), verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.CheckCircle, contentDescription = null, tint = primary, modifier = Modifier.size(20.dp))
@@ -282,7 +289,7 @@ private fun OnboardingScreen(viewModel: BioTrackViewModel) {
             }
             Spacer(Modifier.height(36.dp))
             when (step) {
-                0 -> Button(onClick = { step = 1 }, modifier = Modifier.fillMaxWidth()) { Text("Continuer") }
+                0 -> Button(onClick = { step = 1 }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.continue_action)) }
                 1 -> {
                     Button(
                         onClick = {
@@ -290,8 +297,8 @@ private fun OnboardingScreen(viewModel: BioTrackViewModel) {
                             step = 2
                         },
                         modifier = Modifier.fillMaxWidth()
-                    ) { Text("Activer les notifications") }
-                    TextButton(onClick = { step = 2 }, modifier = Modifier.fillMaxWidth()) { Text("Plus tard") }
+                    ) { Text(stringResource(R.string.enable_notifications)) }
+                    TextButton(onClick = { step = 2 }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.later)) }
                 }
                 else -> {
                     Button(
@@ -300,15 +307,15 @@ private fun OnboardingScreen(viewModel: BioTrackViewModel) {
                             else step = 2
                         },
                         modifier = Modifier.fillMaxWidth()
-                    ) { Text(if (healthManager.availability() == HealthConnectManager.Availability.AVAILABLE) "Connecter Health Connect" else "Continuer sans Health Connect") }
-                    TextButton(onClick = { viewModel.completeOnboarding() }, modifier = Modifier.fillMaxWidth()) { Text("Terminer plus tard") }
+                    ) { Text(stringResource(if (healthManager.availability() == HealthConnectManager.Availability.AVAILABLE) R.string.connect_health_connect else R.string.continue_without_health_connect)) }
+                    TextButton(onClick = { viewModel.completeOnboarding() }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.finish_later)) }
                 }
             }
             if (step == 2) {
                 Spacer(Modifier.height(8.dp))
-                Text("Health Connect est disponible sur Android 9+ avec Google Play services. Vous pourrez modifier cet accès dans les paramètres.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(R.string.health_connect_onboarding_info), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(20.dp))
-                Button(onClick = { viewModel.completeOnboarding() }, modifier = Modifier.fillMaxWidth()) { Text("Commencer") }
+                Button(onClick = { viewModel.completeOnboarding() }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.start)) }
             }
         }
     }
@@ -320,15 +327,20 @@ private fun HomeScreen(
     onOpenSettings: () -> Unit,
     onNavigate: (AppTab) -> Unit
 ) {
-    val context = LocalContext.current
     val snapshot by viewModel.snapshot.collectAsState()
+    val selectedCheckInMetricIds by viewModel.selectedCheckInMetricIds.collectAsState()
     val showRecommendations by viewModel.showRecommendations.collectAsState()
     var checkInPeriod by remember { mutableStateOf<CheckInPeriod?>(null) }
     var reminderDialog by remember { mutableStateOf(false) }
+    var reminderEditor by remember { mutableStateOf<Reminder?>(null) }
+    var reminderDeleteCandidate by remember { mutableStateOf<Reminder?>(null) }
     var recommendationsExpanded by rememberSaveable { mutableStateOf(true) }
     val plan = Planner.plan(snapshot)
-    val protocols = Planner.protocolsScheduledToday(snapshot)
-    val supplements = Planner.supplementsScheduledToday(snapshot)
+    val protocols = plan.items.filter { it.kind == PlannedItemKind.PROTOCOL }
+    val supplements = plan.items.filter { it.kind == PlannedItemKind.SUPPLEMENT }
+    val activeProfile = Planner.activeProfile(snapshot)
+    val remindersToday = Planner.remindersScheduledToday(snapshot)
+        .filter { activeProfile?.disabledReminderIds?.contains(it.id) != true }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -338,33 +350,34 @@ private fun HomeScreen(
         item {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Votre Checklist quotidienne", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.daily_checklist), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     Text(formatDate(System.currentTimeMillis()), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Box(modifier = Modifier.size(46.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary), contentAlignment = Alignment.Center) {
                     Text("${plan.total - plan.done}", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
                 }
-                IconButton(onClick = onOpenSettings) { Icon(Icons.Default.Settings, contentDescription = "Paramètres") }
+                IconButton(onClick = onOpenSettings) { Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings)) }
             }
         }
         if (showRecommendations) {
             item {
                 BioCard {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Recommandations", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                        IconButton(onClick = { viewModel.refreshInsights() }) { Icon(Icons.Default.Refresh, contentDescription = "Rafraîchir") }
-                        IconButton(onClick = { recommendationsExpanded = !recommendationsExpanded }) { Icon(if (recommendationsExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore, contentDescription = "Déplier") }
+                        Text(stringResource(R.string.recommendations), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                        IconButton(onClick = { viewModel.refreshInsights() }) { Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.refresh)) }
+                        IconButton(onClick = { recommendationsExpanded = !recommendationsExpanded }) { Icon(if (recommendationsExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore, contentDescription = stringResource(if (recommendationsExpanded) R.string.collapse else R.string.expand)) }
                     }
                     if (recommendationsExpanded) {
-                        if (snapshot.recommendations.isEmpty()) Text("Aucune recommandation pour le moment.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        if (snapshot.recommendations.isEmpty()) Text(stringResource(R.string.no_recommendations), color = MaterialTheme.colorScheme.onSurfaceVariant)
                         snapshot.recommendations.take(3).forEach { item ->
+                            val display = localizedRecommendation(item, snapshot)
                             Column(modifier = Modifier.padding(vertical = 5.dp)) {
-                                Text(item.title, fontWeight = FontWeight.SemiBold)
-                                Text(item.message, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(display.title, fontWeight = FontWeight.SemiBold)
+                                Text(display.message, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                     } else {
-                        Text("${snapshot.recommendations.size} recommandation(s) disponible(s)", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(pluralStringResource(R.plurals.recommendations_available, snapshot.recommendations.size, snapshot.recommendations.size), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
@@ -372,8 +385,8 @@ private fun HomeScreen(
         item {
             BioCard {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Check-ins quotidiens", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                    Text("${listOf(CheckInPeriod.MORNING, CheckInPeriod.EVENING).count { period -> snapshot.dailyCheckIns.any { it.period == period && Planner.sameDay(it.date, System.currentTimeMillis()) } }}/2", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.daily_checkins), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                    Text(stringResource(R.string.count_fraction, listOf(CheckInPeriod.MORNING, CheckInPeriod.EVENING).count { period -> snapshot.dailyCheckIns.any { it.period == period && Planner.sameDay(it.date, System.currentTimeMillis()) } }, 2), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Spacer(Modifier.height(8.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -385,64 +398,86 @@ private fun HomeScreen(
         item {
             BioCard {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Objectifs", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                    Text("${plan.done}/${plan.total}", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.goals), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                    Text(stringResource(R.string.count_fraction, plan.done, plan.total), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Spacer(Modifier.height(12.dp))
                 LinearProgressIndicator(progress = { if (plan.total == 0) 0f else plan.done.toFloat() / plan.total }, modifier = Modifier.fillMaxWidth().height(12.dp).clip(CircleShape))
                 Spacer(Modifier.height(6.dp))
-                Text("${if (plan.total == 0) 0 else plan.done * 100 / plan.total}% réalisé aujourd'hui", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(R.string.completion_today, if (plan.total == 0) 0 else plan.done * 100 / plan.total), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
         item {
             BioCard {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Rappels pour aujourd'hui", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                    TextButton(onClick = { reminderDialog = true }) { Text("Ajouter") }
+                    Text(stringResource(R.string.reminders_today), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                    TextButton(onClick = { reminderEditor = null; reminderDialog = true }) { Text(stringResource(R.string.add)) }
                 }
-                if (snapshot.reminders.isEmpty()) {
-                    Text("Aucun rappel", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (remindersToday.isEmpty()) {
+                    Text(stringResource(R.string.no_reminder), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 } else {
-                    snapshot.reminders.take(3).forEach { reminder ->
-                        ReminderRow(reminder, viewModel)
+                    remindersToday.forEach { reminder ->
+                        ReminderRow(
+                            reminder = reminder,
+                            viewModel = viewModel,
+                            onEdit = { reminderEditor = reminder; reminderDialog = true },
+                            onDelete = { reminderDeleteCandidate = reminder }
+                        )
                     }
                 }
             }
         }
         item {
             HomeListCard(
-                title = "Protocoles à suivre aujourd'hui",
-                items = protocols.map { it.id to (it.name to (it.detail ?: Planner.frequencyLabel(it.frequency))) },
-                emptyText = "Aucun protocole planifié.",
+                title = stringResource(R.string.protocols_today),
+                items = protocols,
+                emptyText = stringResource(R.string.no_protocol_scheduled),
                 onSeeAll = { onNavigate(AppTab.PROTOCOLS) },
-                checked = { id -> Planner.isProtocolDoneToday(id, snapshot) },
-                onToggle = { id -> viewModel.toggleProtocol(id) }
+                onToggle = { item -> viewModel.toggleProtocolOccurrence(item.sourceId, item.occurrenceIndex) }
             )
         }
         item {
             HomeListCard(
-                title = "Suppléments à suivre aujourd'hui",
-                items = supplements.map { it.id to (it.name to (it.dose ?: it.timeContext ?: "À noter")) },
-                emptyText = "Aucun supplément planifié.",
+                title = stringResource(R.string.supplements_today),
+                items = supplements,
+                emptyText = stringResource(R.string.no_supplement_scheduled),
                 onSeeAll = { onNavigate(AppTab.SUPPLEMENTS) },
-                checked = { id -> Planner.isSupplementTakenToday(id, snapshot) },
-                onToggle = { id -> viewModel.toggleSupplement(id) }
+                onToggle = { item -> viewModel.toggleSupplementOccurrence(item.sourceId, item.occurrenceIndex) }
             )
         }
     }
 
     checkInPeriod?.let { period ->
-        CheckInDialog(period, snapshot.dailyCheckIns.firstOrNull { it.period == period && Planner.sameDay(it.date, System.currentTimeMillis()) }, onDismiss = { checkInPeriod = null }) { energy, mood, sleep, stress, note ->
-            viewModel.upsertCheckIn(period, energy, mood, sleepQuality = sleep, stress = stress, note = note)
+        val selectedMetrics = selectedCheckInMetricIds.mapNotNull { id -> snapshot.metrics.firstOrNull { it.id == id } }
+        val marker = "Check-in ${period.name}"
+        val existingMetricValues = snapshot.metricEntries
+            .filter { it.notes == marker && Planner.sameDay(it.date, System.currentTimeMillis()) }
+            .associate { it.metricId to it.value }
+        CheckInDialog(
+            period = period,
+            existing = snapshot.dailyCheckIns.firstOrNull { it.period == period && Planner.sameDay(it.date, System.currentTimeMillis()) },
+            selectedMetrics = selectedMetrics,
+            existingMetricValues = existingMetricValues,
+            onDismiss = { checkInPeriod = null }
+        ) { energy, mood, sleep, stress, note, metricValues ->
+            viewModel.upsertCheckIn(period, energy, mood, sleepQuality = sleep, stress = stress, note = note, metricValues = metricValues)
             checkInPeriod = null
         }
     }
     if (reminderDialog) {
-        ReminderDialog(onDismiss = { reminderDialog = false }) { reminder ->
-            viewModel.addReminder(reminder)
-            ReminderScheduler.schedule(context, reminder)
+        ReminderDialog(existing = reminderEditor, onDismiss = { reminderDialog = false }) { reminder ->
+            if (reminderEditor == null) viewModel.addReminder(reminder) else viewModel.updateReminder(reminder)
             reminderDialog = false
         }
+    }
+    reminderDeleteCandidate?.let { reminder ->
+        AlertDialog(
+            onDismissRequest = { reminderDeleteCandidate = null },
+            title = { Text(stringResource(R.string.delete_reminder_title)) },
+            text = { Text(stringResource(R.string.delete_reminder_message, reminder.title)) },
+            confirmButton = { Button(onClick = { viewModel.deleteReminder(reminder.id); reminderDeleteCandidate = null }) { Text(stringResource(R.string.delete)) } },
+            dismissButton = { TextButton(onClick = { reminderDeleteCandidate = null }) { Text(stringResource(R.string.cancel)) } }
+        )
     }
 }
 
@@ -453,8 +488,8 @@ private fun CheckInButton(period: CheckInPeriod, snapshot: AppSnapshot, modifier
         Icon(if (done) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked, contentDescription = null, tint = if (done) Color(0xFF2E9A60) else MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(6.dp))
         Column(horizontalAlignment = Alignment.Start) {
-            Text(period.displayName)
-            Text(if (done) "Complété" else "À faire", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(checkInPeriodLabel(period))
+            Text(stringResource(if (done) R.string.completed else R.string.to_do), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -462,24 +497,36 @@ private fun CheckInButton(period: CheckInPeriod, snapshot: AppSnapshot, modifier
 @Composable
 private fun HomeListCard(
     title: String,
-    items: List<Pair<String, Pair<String, String>>>,
+    items: List<PlannedItem>,
     emptyText: String,
     onSeeAll: () -> Unit,
-    checked: (String) -> Boolean,
-    onToggle: (String) -> Unit
+    onToggle: (PlannedItem) -> Unit
 ) {
     BioCard {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-            TextButton(onClick = onSeeAll) { Text("Voir tous") }
+            TextButton(onClick = onSeeAll) { Text(stringResource(R.string.see_all)) }
         }
         if (items.isEmpty()) Text(emptyText, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        items.take(3).forEach { (id, data) ->
-            Row(modifier = Modifier.fillMaxWidth().clickable { onToggle(id) }.padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = { onToggle(id) }) { Icon(if (checked(id)) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked, contentDescription = null, tint = if (checked(id)) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant) }
+        items.forEach { item ->
+            Row(modifier = Modifier.fillMaxWidth().clickable { onToggle(item) }.padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = { onToggle(item) }) { Icon(if (item.done) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked, contentDescription = null, tint = if (item.done) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant) }
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(data.first, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text(data.second, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(item.title, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    val frequency = localizedFrequencyLabel(item.frequency)
+                    val occurrence = if (item.occurrenceCount > 1) {
+                        if (item.kind == PlannedItemKind.SUPPLEMENT) {
+                            stringResource(R.string.intake_occurrence, item.occurrenceIndex + 1, item.occurrenceCount)
+                        } else {
+                            stringResource(R.string.occurrence_with_frequency, item.occurrenceIndex + 1, item.occurrenceCount, frequency)
+                        }
+                    } else null
+                    val subtitle = if (item.kind == PlannedItemKind.SUPPLEMENT) {
+                        listOfNotNull(item.subtitle, occurrence).joinToString(" · ").ifBlank { frequency }
+                    } else {
+                        occurrence ?: frequency
+                    }
+                    Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
@@ -487,18 +534,22 @@ private fun HomeListCard(
 }
 
 @Composable
-private fun ReminderRow(reminder: Reminder, viewModel: BioTrackViewModel) {
-    val context = LocalContext.current
+private fun ReminderRow(
+    reminder: Reminder,
+    viewModel: BioTrackViewModel,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
         Icon(Icons.Default.Notifications, contentDescription = null, tint = if (reminder.enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.width(10.dp))
         Text(reminder.title, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
         Text("%02d:%02d".format(reminder.hour, reminder.minute), color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.width(6.dp))
+        IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit_reminder)) }
+        IconButton(onClick = onDelete) { Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete_reminder)) }
         Switch(checked = reminder.enabled, onCheckedChange = { enabled ->
             viewModel.setReminderEnabled(reminder.id, enabled)
-            val updated = reminder.copy(enabled = enabled)
-            if (enabled) ReminderScheduler.schedule(context, updated) else ReminderScheduler.cancel(context, updated)
         })
     }
 }
@@ -507,28 +558,100 @@ private fun ReminderRow(reminder: Reminder, viewModel: BioTrackViewModel) {
 private fun CheckInDialog(
     period: CheckInPeriod,
     existing: DailyCheckIn?,
+    selectedMetrics: List<Metric>,
+    existingMetricValues: Map<String, Double>,
     onDismiss: () -> Unit,
-    onSave: (Int, Int, Int?, Int?, String?) -> Unit
+    onSave: (Int, Int, Int?, Int?, String?, Map<String, Double>) -> Unit
 ) {
+    val locale = LocalConfiguration.current.locales[0]
     var energy by remember { mutableFloatStateOf((existing?.energy ?: 6).toFloat()) }
     var mood by remember { mutableFloatStateOf((existing?.mood ?: 6).toFloat()) }
     val existingThird = if (period == CheckInPeriod.MORNING) existing?.sleepQuality else existing?.stress
     var third by remember { mutableFloatStateOf((existingThird ?: 5).toFloat()) }
     var note by remember { mutableStateOf(existing?.note.orEmpty()) }
+    val customMetrics = selectedMetrics.filter { defaultCheckInMetricKind(it) == null }
+    var metricInputs by remember(period, selectedMetrics, existingMetricValues) {
+        mutableStateOf(customMetrics.associate { metric ->
+            metric.id to existingMetricValues[metric.id]?.let { value ->
+                if (metric.kind == MetricKind.HOURS_MINUTES) "%d:%02d".format(value.toInt() / 60, value.toInt() % 60)
+                else value.toString()
+            }.orEmpty()
+        })
+    }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Check-in du ${period.displayName.lowercase(Locale.FRENCH)}") },
+        title = { Text(stringResource(R.string.checkin_title, checkInPeriodLabel(period).lowercase(locale))) },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                RatingSlider("Énergie", energy) { energy = it }
-                RatingSlider("Humeur", mood) { mood = it }
-                RatingSlider(if (period == CheckInPeriod.MORNING) "Qualité du sommeil" else "Stress", third) { third = it }
-                OutlinedTextField(value = note, onValueChange = { note = it }, label = { Text("Note (facultatif)") }, modifier = Modifier.fillMaxWidth(), minLines = 2)
+                RatingSlider(stringResource(R.string.energy), energy) { energy = it }
+                RatingSlider(stringResource(R.string.mood), mood) { mood = it }
+                RatingSlider(stringResource(if (period == CheckInPeriod.MORNING) R.string.sleep_quality else R.string.stress), third) { third = it }
+                customMetrics.forEach { metric ->
+                    OutlinedTextField(
+                        value = metricInputs[metric.id].orEmpty(),
+                        onValueChange = { value -> metricInputs = metricInputs + (metric.id to value) },
+                        label = { Text(metric.name) },
+                        supportingText = { Text(if (metric.kind == MetricKind.HOURS_MINUTES) stringResource(R.string.hours_minutes_format) else metric.unit ?: stringResource(R.string.numeric_value)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                }
+                OutlinedTextField(value = note, onValueChange = { note = it }, label = { Text(stringResource(R.string.optional_note)) }, modifier = Modifier.fillMaxWidth(), minLines = 2)
             }
         },
-        confirmButton = { Button(onClick = { onSave(energy.toInt(), mood.toInt(), if (period == CheckInPeriod.MORNING) third.toInt() else null, if (period == CheckInPeriod.EVENING) third.toInt() else null, note) }) { Text("Enregistrer") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Annuler") } }
+        confirmButton = { Button(onClick = {
+            val values = mutableMapOf<String, Double>()
+            selectedMetrics.forEach { metric ->
+                when (defaultCheckInMetricKind(metric)) {
+                    "energy" -> values[metric.id] = energy.toDouble()
+                    "mood" -> values[metric.id] = mood.toDouble()
+                    "sleep" -> if (period == CheckInPeriod.MORNING) values[metric.id] = third.toDouble()
+                    "stress" -> if (period == CheckInPeriod.EVENING) values[metric.id] = third.toDouble()
+                    else -> parseMetricInput(metricInputs[metric.id].orEmpty(), metric.kind)?.let { values[metric.id] = it }
+                }
+            }
+            onSave(
+                energy.toInt(),
+                mood.toInt(),
+                if (period == CheckInPeriod.MORNING) third.toInt() else null,
+                if (period == CheckInPeriod.EVENING) third.toInt() else null,
+                note,
+                values
+            )
+        }) { Text(stringResource(R.string.save)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } }
     )
+}
+
+@Composable
+fun checkInPeriodLabel(period: CheckInPeriod): String = stringResource(
+    if (period == CheckInPeriod.MORNING) R.string.period_morning else R.string.period_evening
+)
+
+private fun defaultCheckInMetricKind(metric: Metric): String? {
+    val name = java.text.Normalizer.normalize(metric.name, java.text.Normalizer.Form.NFD)
+        .replace(Regex("\\p{M}+"), "")
+        .lowercase(Locale.ROOT)
+        .replace(" ", "")
+    return when {
+        name.contains("energie") || name.contains("energy") -> "energy"
+        name.contains("humeur") || name.contains("mood") -> "mood"
+        name.contains("qualitedusommeil") || name.contains("sleepquality") -> "sleep"
+        name.contains("stress") -> "stress"
+        else -> null
+    }
+}
+
+private fun parseMetricInput(raw: String, kind: MetricKind): Double? {
+    val trimmed = raw.trim()
+    if (trimmed.isEmpty()) return null
+    if (kind == MetricKind.HOURS_MINUTES && ':' in trimmed) {
+        val parts = trimmed.split(':', limit = 2)
+        val hours = parts.getOrNull(0)?.toIntOrNull() ?: return null
+        val minutes = parts.getOrNull(1)?.toIntOrNull() ?: return null
+        return (hours.coerceAtLeast(0) * 60 + minutes.coerceIn(0, 59)).toDouble()
+    }
+    return trimmed.replace(',', '.').toDoubleOrNull()
 }
 
 @Composable
@@ -541,26 +664,64 @@ private fun RatingSlider(label: String, value: Float, onValueChange: (Float) -> 
 }
 
 @Composable
-private fun ReminderDialog(onDismiss: () -> Unit, onSave: (Reminder) -> Unit) {
-    var title by remember { mutableStateOf("") }
-    var hour by remember { mutableStateOf("08") }
-    var minute by remember { mutableStateOf("00") }
-    var notes by remember { mutableStateOf("") }
+private fun ReminderDialog(existing: Reminder?, onDismiss: () -> Unit, onSave: (Reminder) -> Unit) {
+    var title by remember(existing?.id) { mutableStateOf(existing?.title.orEmpty()) }
+    var hour by remember(existing?.id) { mutableStateOf("%02d".format(existing?.hour ?: 8)) }
+    var minute by remember(existing?.id) { mutableStateOf("%02d".format(existing?.minute ?: 0)) }
+    var notes by remember(existing?.id) { mutableStateOf(existing?.notes.orEmpty()) }
+    var days by remember(existing?.id) { mutableStateOf(existing?.weekdays?.toSet().orEmpty()) }
+    val labels = listOf(
+        stringResource(R.string.weekday_initial_monday), stringResource(R.string.weekday_initial_tuesday),
+        stringResource(R.string.weekday_initial_wednesday), stringResource(R.string.weekday_initial_thursday),
+        stringResource(R.string.weekday_initial_friday), stringResource(R.string.weekday_initial_saturday),
+        stringResource(R.string.weekday_initial_sunday)
+    )
+    val defaultReminderTitle = stringResource(R.string.default_reminder_title)
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Ajouter un rappel") },
+        title = { Text(stringResource(if (existing == null) R.string.add_reminder else R.string.edit_reminder)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedTextField(title, { title = it }, label = { Text("Titre") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                OutlinedTextField(title, { title = it }, label = { Text(stringResource(R.string.reminder_title)) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    OutlinedTextField(hour, { hour = it.filter(Char::isDigit).take(2) }, label = { Text("Heure") }, modifier = Modifier.weight(1f), singleLine = true)
-                    OutlinedTextField(minute, { minute = it.filter(Char::isDigit).take(2) }, label = { Text("Minute") }, modifier = Modifier.weight(1f), singleLine = true)
+                    OutlinedTextField(hour, { hour = it.filter(Char::isDigit).take(2) }, label = { Text(stringResource(R.string.hour_field)) }, modifier = Modifier.weight(1f), singleLine = true)
+                    OutlinedTextField(minute, { minute = it.filter(Char::isDigit).take(2) }, label = { Text(stringResource(R.string.minute_field)) }, modifier = Modifier.weight(1f), singleLine = true)
                 }
-                OutlinedTextField(notes, { notes = it }, label = { Text("Note (facultatif)") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(notes, { notes = it }, label = { Text(stringResource(R.string.optional_note)) }, modifier = Modifier.fillMaxWidth())
+                Text(stringResource(R.string.days), style = MaterialTheme.typography.labelMedium)
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    listOf(stringResource(R.string.all_days_short) to (1..7).toSet(), stringResource(R.string.weekdays_short) to (1..5).toSet(), stringResource(R.string.weekend_short) to setOf(6, 7)).forEach { (label, preset) ->
+                        FilterChip(selected = days == preset, onClick = { days = preset }, label = { Text(label) })
+                    }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    labels.forEachIndexed { index, label ->
+                        val day = index + 1
+                        FilterChip(
+                            selected = day in days,
+                            onClick = { days = if (day in days) days - day else days + day },
+                            label = { Text(label) }
+                        )
+                    }
+                }
             }
         },
-        confirmButton = { Button(onClick = { onSave(Reminder(title = title.ifBlank { "Rappel BioTrack" }, hour = hour.toIntOrNull()?.coerceIn(0, 23) ?: 8, minute = minute.toIntOrNull()?.coerceIn(0, 59) ?: 0, notes = notes.takeIf { it.isNotBlank() })) }, enabled = title.isNotBlank()) { Text("Ajouter") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Annuler") } }
+        confirmButton = { Button(onClick = {
+            val reminderId = existing?.id ?: java.util.UUID.randomUUID().toString()
+            onSave(Reminder(
+                id = reminderId,
+                notificationBaseId = existing?.notificationBaseId ?: "reminder-$reminderId",
+                title = title.ifBlank { defaultReminderTitle },
+                hour = hour.toIntOrNull()?.coerceIn(0, 23) ?: 8,
+                minute = minute.toIntOrNull()?.coerceIn(0, 59) ?: 0,
+                weekdays = days.sorted(),
+                notes = notes.takeIf { it.isNotBlank() },
+                enabled = existing?.enabled ?: true,
+                targetKind = existing?.targetKind,
+                targetId = existing?.targetId
+            ))
+        }, enabled = title.isNotBlank()) { Text(stringResource(if (existing == null) R.string.add else R.string.save)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } }
     )
 }
 
@@ -576,13 +737,13 @@ fun BioCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -
     }
 }
 
-fun formatDate(timestamp: Long): String = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(Locale.FRENCH).format(Instant.ofEpochMilli(timestamp).atZone(java.time.ZoneId.systemDefault()))
+fun formatDate(timestamp: Long): String = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(Locale.getDefault()).format(Instant.ofEpochMilli(timestamp).atZone(java.time.ZoneId.systemDefault()))
 
 fun formatValue(value: Double, kind: MetricKind, unit: String?): String {
     return if (kind == MetricKind.HOURS_MINUTES) {
         val minutes = value.toInt()
         "%dh%02d".format(minutes / 60, minutes % 60)
     } else {
-        "%.1f%s".format(Locale.FRENCH, value, if (unit.isNullOrBlank()) "" else " ${unit}")
+        "%.1f%s".format(Locale.getDefault(), value, if (unit.isNullOrBlank()) "" else " ${unit}")
     }
 }

@@ -59,7 +59,7 @@ struct BioTrackWidget: Widget {
                 .containerBackground(.fill.tertiary, for: .widget)
                 .widgetURL(URL(string: "biotrack://home"))
         }
-        .configurationDisplayName("BioTrack Quotidien")
+        .configurationDisplayName("AJUSTE au quotidien")
         .description("Objectifs du jour et rappels avec actions rapides.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }

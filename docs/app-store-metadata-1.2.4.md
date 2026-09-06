@@ -1,4 +1,4 @@
-# Métadonnées App Store Connect — BioTrack 1.2.4
+# Métadonnées App Store Connect — AJUSTE 1.2.4
 
 Document prêt à copier dans App Store Connect pour la build **1.2.4 (12)**.
 Les réponses de confidentialité, de santé et d’export doivent être confirmées
@@ -6,8 +6,8 @@ par le titulaire du compte à partir du comportement réel de la build.
 
 ## Identité
 
-- Nom : `BioTrack`
-- Sous-titre : `Routines & données privées`
+- Nom : `AJUSTE — Labo personnel`
+- Sous-titre : `Routines, tendances & N=1`
 - Catégorie principale : `Santé et remise en forme`
 - Catégorie secondaire : `Style de vie`
 - Version : `1.2.4`
@@ -17,14 +17,14 @@ par le titulaire du compte à partir du comportement réel de la build.
 
 ## URLs
 
-- Marketing : `https://fab72309.github.io/biotrack/`
-- Support : `https://fab72309.github.io/biotrack/support.html`
-- Confidentialité : `https://fab72309.github.io/biotrack/privacy-policy.html`
+- Marketing : `https://fab72309.github.io/ajuste/`
+- Support : `https://fab72309.github.io/ajuste/support.html`
+- Confidentialité : `https://fab72309.github.io/ajuste/privacy-policy.html`
 
 ## Texte promotionnel
 
-> Une fenêtre Objectifs plus claire, des graphiques plus lisibles et une
-> lecture plus transparente de vos associations exploratoires.
+> Observez vos routines, testez un changement à la fois et repérez vos
+> tendances — avec des données qui restent sur votre appareil.
 
 ## Nouveautés
 
@@ -41,15 +41,15 @@ par le titulaire du compte à partir du comportement réel de la build.
 
 ## Texte public court (YouTube / réseaux)
 
-BioTrack 1.2.4 améliore la fenêtre Objectifs, harmonise les fenêtres de
+AJUSTE 1.2.4 améliore la fenêtre Objectifs, harmonise les fenêtres de
 l’application et rend les graphiques et associations exploratoires plus
-lisibles. Vos données restent privées ; BioTrack aide à observer vos habitudes
+lisibles. Vos données restent privées ; AJUSTE aide à observer vos habitudes
 et ne fournit ni diagnostic ni conseil médical.
 
 ## Notes pour App Review / TestFlight
 
-BioTrack ne nécessite aucun compte. Les données restent locales sur l’appareil
-et aucun serveur BioTrack n’est utilisé.
+AJUSTE ne nécessite aucun compte. Les données restent locales sur l’appareil
+et aucun serveur AJUSTE n’est utilisé.
 
 Parcours conseillé :
 

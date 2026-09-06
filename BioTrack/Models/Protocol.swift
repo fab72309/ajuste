@@ -6,6 +6,22 @@ public enum Frequency: Codable, Equatable {
     case timesPerDay(Int)
 }
 
+public extension Frequency {
+    /// The existing storage format represents an ad-hoc frequency as a
+    /// weekly frequency without selected days. Keep that representation for
+    /// backward compatibility while giving it explicit UI and scheduling
+    /// semantics.
+    var isAsNeeded: Bool {
+        guard case .weekly(let days) = self else { return false }
+        return days.isEmpty
+    }
+
+    var hasSpecificDays: Bool {
+        guard case .weekly(let days) = self else { return false }
+        return !days.isEmpty
+    }
+}
+
 public struct ProtocolItem: Identifiable, Codable, Equatable {
     public var id: UUID = UUID()
     public var name: String
